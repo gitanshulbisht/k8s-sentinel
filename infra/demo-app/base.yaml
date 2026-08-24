@@ -1,0 +1,109 @@
+# Baseline demo application for K8s Sentinel.
+#
+# "payments-api" is a deliberately instrumented nginx deployment that all four
+# chaos scenarios can break and this file can always restore:
+#
+#   kubectl apply -f infra/demo-app/base.yaml   ← canonical revert for every scenario
+#
+# Surfaces provided on purpose:
+#   - configmap app-config mounted at /etc/app-config   → crashloop.py breaks its key ref
+#   - resources.requests/limits.memory                  → oomkill.py shrinks the limit
+#   - liveness probe GET /healthz                       → probe-fail.py repoints the path
+#   - pinned image tag                                  → imagepull.py swaps to a bad tag
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo
+  labels:
+    app.kubernetes.io/part-of: k8s-sentinel-demo
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: demo
+data:
+  DATABASE_URL: "postgres://payments-db.demo.svc:5432/payments"
+  LOG_LEVEL: "info"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-api
+  namespace: demo
+  labels:
+    app: payments-api
+    tier: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: payments-api
+  template:
+    metadata:
+      labels:
+        app: payments-api
+        tier: backend
+    spec:
+      containers:
+        - name: api
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+              name: http
+          # Realistic resource envelope; oomkill.py will shrink limits.memory.
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          # Liveness on /healthz served by the default nginx config below;
+          # probe-fail.py repoints the path to force restart storms.
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          volumeMounts:
+            - name: app-config
+              mountPath: /etc/app-config
+              readOnly: true
+            - name: nginx-healthz
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+      volumes:
+        - name: app-config
+          configMap:
+            name: app-config
+        - name: nginx-healthz
+          configMap:
+            name: nginx-healthz
+---
+# Serve /healthz without needing a custom image build: mount a tiny config.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-healthz
+  namespace: demo
+data:
+  default.conf: |
+    server {
+      listen 80;
+      location = /healthz {
+        access_log off;
+        return 200 "ok\n";
+      }
+      location / {
+        return 404;
+      }
+    }

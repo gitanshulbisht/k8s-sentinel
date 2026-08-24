@@ -1,0 +1,13 @@
+# kind cluster sized for an 8 GB MacBook (Docker Desktop VM ~4.8 GB allocatable).
+# Control-plane only — no worker nodes needed for triage demos.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    # Keep the node's kubelet memory footprint bounded so Docker VM stays healthy.
+    kubeadmConfigPatches:
+      - |
+        kind: KubeletConfiguration
+        nodeLeaseDurationSeconds: 40
+        evictionHard:
+          memory.available: "256Mi"

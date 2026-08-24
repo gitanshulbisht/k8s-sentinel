@@ -1,0 +1,32 @@
+# Secrets & credentials
+.env
+.env.*
+*.pem
+*.key
+*_config.json
+nim_config.json
+
+# Kubernetes state
+kubeconfig
+*.kubeconfig
+kind-config-local.yaml
+
+# TrueForge local state (SQLite etc.)
+.trueforge/
+trueforge.db*
+*.sqlite
+*.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# OS noise
+.DS_Store
+
+# Hermes internal planning (session-private)
+.hermes/
+
+# Saved webpage reference bulk assets stay, but nothing generated
+node_modules/
