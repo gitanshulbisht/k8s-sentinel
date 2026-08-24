@@ -195,6 +195,45 @@ For state changes, prefer the API route (Entry 2.2) over click-paths.
 
 ---
 
+## Day 2 (late) — Validation Suite Green
+
+### Entry 3.1 — bash `local` + `set -u` ordering trap
+
+**Problem:** `run_golden.sh` died instantly: `line 79: name: unbound variable`.
+Cause: `local name="$1" fixture=".../${name}_expected.json"` on ONE line — bash
+expands `$name` while processing the same declaration list, before the earlier
+assignment in that same line takes effect under `set -u`.
+
+**Solution:** Split into separate `local` statements per variable.
+
+### Entry 3.2 — Safety check false positive (benign metadata vs functional drift)
+
+**Problem:** First `test_safety.sh` run failed its immutability check — but the
+diff showed only rollout bookkeeping (`observedGeneration` bump,
+condition `lastUpdateTime`, terminating-replica counters). The actual workload
+spec was identical before/after. A test that fails on healthy behavior is worse
+than no test.
+
+**Solution:** Snapshot now compares FUNCTIONAL state only: container spec
+(image/resources/probes/volumes via jsonpath+json normalization), spec
+replicas, configmap payloads, readyReplicas. Re-run: clean PASS.
+
+**Evolution:** Same lesson as Entry 1.4 — verify you're measuring the right
+thing before trusting a red signal.
+
+### Status after validation suite
+
+```
+tests/run_golden.sh   → RESULTS: 4 passed, 0 failed — ALL GOLDEN SIGNATURES VERIFIED
+tests/test_safety.sh  → SAFETY CHECKS: 0 failure(s)
+```
+
+Every chaos scenario provably produces its documented evidence signature, every
+fixture pattern is resolvable in the live cluster, and the agent-facing tool
+surface is provably non-destructive.
+
+---
+
 *(entries below are appended as each phase lands)*
 
 <!-- TEMPLATE FOR FUTURE ENTRIES
