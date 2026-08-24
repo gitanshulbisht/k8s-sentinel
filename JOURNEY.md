@@ -234,6 +234,32 @@ surface is provably non-destructive.
 
 ---
 
+### Entry 3.3 — Two timing races the first green run hid (found by re-verification)
+
+**Problem:** The golden suite passed 4/4 on its first run — then FAILED on a
+fresh re-run. `imagepull` broke twice in different ways:
+1. *Signature race:* pods flip `ErrImagePull → ImagePullBackOff` within
+  seconds; polling only for `ErrImagePull` loses the race ~50% of the time.
+2. *Evidence-availability race:* kubelet emits Warning events asynchronously
+   AFTER pod status flips. Checking events once, immediately after the status
+   signature appears, sees an empty event list intermittently.
+
+The uncomfortable lesson: a suite that passes once proves nothing about
+flakiness. Only the second run exposed both races.
+
+**Solution:**
+- Signature matcher now accepts BOTH phases:
+  `"reason": "(ErrImagePull|ImagePullBackOff)"`.
+- Evidence resolution became a retry loop (7 × 5s) that only passes when ALL
+  fixture patterns resolve; on exhaustion it prints exactly which patterns
+  never appeared and dumps live pods/events.
+
+**Evolution:** The suite now tests evidence *availability*, not just existence,
+and failure output is self-diagnosing. Both fixes verified by two consecutive
+full-suite runs post-change.
+
+---
+
 *(entries below are appended as each phase lands)*
 
 <!-- TEMPLATE FOR FUTURE ENTRIES

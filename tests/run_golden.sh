@@ -38,7 +38,9 @@ wait_for_new_pod_signature() { # $1 = jsonpath condition function name
 }
 
 sig_imagepull() {
-  kubectl -n "$NS" get pods -o json | grep -q '"reason": *"ErrImagePull"\|"reason":"ErrImagePull"'
+  # Match BOTH phases: pods flip ErrImagePull -> ImagePullBackOff rapidly,
+  # so polling only for ErrImagePull races the transition.
+  kubectl -n "$NS" get pods -o json | grep -qE '"reason": *"(ErrImagePull|ImagePullBackOff)"'
 }
 sig_oomkill() {
   kubectl -n "$NS" get pods -o json | grep -q '"reason": *"OOMKilled"\|"reason":"OOMKilled"'
@@ -57,17 +59,27 @@ sig_probefail() {
 
 check_fixture_patterns() { # $1=scenario  $2=json-with-required_evidence_patterns
   local scenario="$1" json="$2"
-  local pattern hits=0 total
-  total=$(echo "$json" | jq '.expected.required_evidence_patterns | length')
-  while IFS= read -r pattern; do
-    case "$scenario" in
-      crashloop)  kubectl -n "$NS" logs "$(newest_pod)" --previous 2>/dev/null | grep -qiE "$pattern" && hits=$((hits+1)) ;;
-      oomkill)    kubectl -n "$NS" get pods -o json | grep -qiE "$pattern" && hits=$((hits+1)) ;;
-      imagepull)  kubectl -n "$NS" get events -o json | grep -qiE "$pattern" && hits=$((hits+1)) ;;
-      probe-fail) kubectl -n "$NS" get deploy "$DEPLOY" -o json | grep -qiE "$pattern" && hits=$((hits+1)) ;;
-    esac
-  done < <(echo "$json" | jq -r '.expected.required_evidence_patterns[]')
-  [ "$hits" -eq "$total" ]
+  local pattern probe
+  local attempts=0 max_attempts=7   # kubelet emits events async AFTER pod status flips
+  local -a missing
+  while (( attempts < max_attempts )); do
+    missing=()
+    while IFS= read -r pattern; do
+      probe=""
+      case "$scenario" in
+        crashloop)  probe=$(kubectl -n "$NS" logs "$(newest_pod)" --previous 2>/dev/null | grep -iE "$pattern" | head -1) ;;
+        oomkill)    probe=$(kubectl -n "$NS" get pods -o json | grep -iE "$pattern" | head -1) ;;
+        imagepull)  probe=$(kubectl -n "$NS" get events -o json 2>/dev/null | grep -iE "$pattern" | head -1) ;;
+        probe-fail) probe=$(kubectl -n "$NS" get deploy "$DEPLOY" -o json | grep -iE "$pattern" | head -1) ;;
+      esac
+      [ -z "$probe" ] && missing+=("$pattern")
+    done < <(echo "$json" | jq -r '.expected.required_evidence_patterns[]')
+    [ "${#missing[@]}" -eq 0 ] && return 0
+    attempts=$((attempts+1))
+    sleep 5
+  done
+  printf '      unresolved patterns after %ds: %s\n' $((max_attempts*5)) "${missing[*]}"
+  return 1
 }
 
 newest_pod() {
@@ -85,7 +97,10 @@ run_scenario() { # $1=name $2=script $3=sig_fn
   if wait_for_new_pod_signature "$sig"; then
     ok "signature appeared within ${TIMEOUT}s"
   else
-    bad "signature NOT observed within ${TIMEOUT}s"; fail=$((fail+1)); failed_scenarios+=("$name"); revert; return
+    bad "signature NOT observed within ${TIMEOUT}s — live state:"
+    kubectl -n "$NS" get pods | sed 's/^/      /' || true
+    kubectl -n "$NS" get events --sort-by=.lastTimestamp 2>/dev/null | tail -5 | sed 's/^/      /' || true
+    fail=$((fail+1)); failed_scenarios+=("$name"); revert; return
   fi
   if check_fixture_patterns "$name" "$(cat "$fixture")"; then
     ok "all fixture evidence patterns resolvable in live cluster"; pass=$((pass+1))
