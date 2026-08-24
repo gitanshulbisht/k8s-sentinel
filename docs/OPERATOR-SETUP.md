@@ -3,18 +3,21 @@
 Two secrets are needed that this repo deliberately does NOT contain.
 Do these once; everything else is committed and reproducible.
 
-## 1. Model provider (OpenRouter)
+## 1. Model provider
 
-TrueForge → **Settings → Models**:
+Verified catalog (no native OpenRouter): `openai`, `anthropic`, `google-gemini`,
+`fireworks`, `zai`, `moonshot`, `alibaba`, `together`, `custom`.
 
-- If OpenRouter appears in the catalog: Configure → paste your
-  [OpenRouter API key](https://openrouter.ai/settings/integrations).
-- Else: **Add Custom Provider** → name `openrouter`,
-  base URL `https://openrouter.ai/api/v1`, OpenAI-compatible, paste key.
+**Option A — OpenRouter via Custom Provider:** Settings → Models →
+**Add Custom Provider** → name `openrouter`, type OpenAI-compatible,
+base URL `https://openrouter.ai/api/v1`, paste your
+[OpenRouter key](https://openrouter.ai/settings/integrations).
 
-Recommended default model for tool-calling quality: a strong frontier model
-(e.g. `anthropic/claude-sonnet-4` class). Free models tend to fail multi-hop
-MCP tool loops.
+**Option B — native key:** Configure any listed provider directly if you hold
+its key.
+
+Recommended default: a strong tool-calling model (`anthropic/claude-sonnet-4`
+class via either route). Free models tend to fail multi-hop MCP tool loops.
 
 ## 2. Sandbox provider (Daytona)
 
