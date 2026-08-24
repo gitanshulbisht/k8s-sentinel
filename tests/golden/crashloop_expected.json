@@ -1,0 +1,18 @@
+{
+  "scenario": "crashloop",
+  "script": "chaos/scenarios/crashloop.py",
+  "expected": {
+    "root_cause_class": "CONFIG_INVALID",
+    "min_confidence": 0.6,
+    "required_evidence_patterns": [
+      "emerg.*unknown directive",
+      "this_directive_does_not_exist"
+    ],
+    "expected_signature": {
+      "pod_status": "CrashLoopBackOff",
+      "logs_previous_contains": "nginx: [emerg] unknown directive"
+    },
+    "fix_shape": "restore ConfigMap nginx-healthz default.conf (kubectl apply of base.yaml) + rollout restart",
+    "notes": "Agent must read PREVIOUS container logs; current-attempt logs die before nginx starts serving."
+  }
+}

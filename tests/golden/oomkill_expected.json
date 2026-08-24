@@ -1,0 +1,19 @@
+{
+  "scenario": "oomkill",
+  "script": "chaos/scenarios/oomkill.py",
+  "expected": {
+    "root_cause_class": "RESOURCE_LIMIT_MISMATCH",
+    "min_confidence": 0.6,
+    "required_evidence_patterns": [
+      "OOMKilled",
+      "137"
+    ],
+    "expected_signature": {
+      "pod_status": "CrashLoopBackOff|Running with climbing restarts",
+      "lastState_terminated_reason": "OOMKilled",
+      "exitCode": 137
+    },
+    "fix_shape": "raise limits.memory (and keep requests.memory <= limits.memory) back toward baseline 128Mi",
+    "notes": "Invariant check: any proposed patch must satisfy requests<=limits or the golden test fails it."
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "scenario": "probe-fail",
+  "script": "chaos/scenarios/probe-fail.py",
+  "expected": {
+    "root_cause_class": "PROBE_ENDPOINT_FAILURE",
+    "min_confidence": 0.6,
+    "required_evidence_patterns": [
+      "healthz-deprecated",
+      "(livenessProbe|readinessProbe)"
+    ],
+    "expected_signature": {
+      "pod_status": "restart storm, logs clean",
+      "liveness_path": "/healthz-deprecated returns 404"
+    },
+    "fix_shape": "repoint probes to /healthz (200) — restore base.yaml probe block",
+    "notes": "TRAP CASE: pod logs are intentionally clean. Agent must correlate restart counters with the live probe spec and test the endpoint. Log-only investigation must FAIL this case."
+  }
+}

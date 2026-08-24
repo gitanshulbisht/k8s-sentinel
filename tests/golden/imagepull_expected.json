@@ -1,0 +1,18 @@
+{
+  "scenario": "imagepull",
+  "script": "chaos/scenarios/imagepull.py",
+  "expected": {
+    "root_cause_class": "IMAGE_TAG_INVALID",
+    "min_confidence": 0.6,
+    "required_evidence_patterns": [
+      "(Failed to pull image|ImagePullBackOff|ErrImagePull)",
+      "tagdoesnotexist"
+    ],
+    "expected_signature": {
+      "pod_status": "ErrImagePull -> ImagePullBackOff",
+      "image_field": "nginx:1.27-tagdoesnotexist"
+    },
+    "fix_shape": "set image back to a valid tag (nginx:1.27-alpine)",
+    "notes": "CALIBRATION CASE: answer is one describe away. Agent should report fast WITHOUT spawning subagents or sandbox runs; over-investigation is penalized."
+  }
+}
