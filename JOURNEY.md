@@ -125,6 +125,76 @@ startTime, not list order."
 
 ---
 
+## Day 2 — Aug 24, 2026 (evening) · TrueForge Integration
+
+### Entry 2.1 — No Kubernetes MCP in the connector catalog (risk materialized, fallback worked)
+
+**Problem:** TrueForge's built-in catalog lists 14 SaaS connectors (linear,
+notion, sentry, github...) — zero Kubernetes. The hackathon guide's
+"connect from catalog" path doesn't exist for our domain.
+
+**Solution:** `kubernetes-mcp-server` (containers/, brew-installable Go binary)
+serves **streamable-HTTP MCP natively** — no wrapper needed:
+
+```
+kubernetes-mcp-server --port 9236 --bind-address 127.0.0.1 \
+  --kubeconfig ~/.kube/config --disable-destructive
+```
+
+Verified with a raw JSON-RPC handshake + `tools/list`: 16 tools
+(pods_list/get/log/top/run, events_list, resources_get/list, nodes_top...).
+
+**Bonus discovery:** `--disable-destructive` strips every destructive tool at
+the MCP layer — defense-in-depth on top of the approval gate.
+
+**Evolution:** Architecture updated: metrics evidence comes from
+metrics-server-backed `pods_top`/`nodes_top` instead of a Prometheus MCP for
+now (8 GB RAM budget; in-cluster Prometheus deferred). Skill Phase 3 rewritten
+to match.
+
+### Entry 2.2 — The Add-MCP dialog fails silently (and how we bypassed it)
+
+**Problem:** Filling TrueForge's "Add MCP server" form and clicking Add did
+nothing: no error, console clean, dialog stayed open. Retried after browser
+session drops — same silent failure. Meanwhile the API showed the truth:
+`GET /api/v1/settings/mcp-servers → {"data":[]}`.
+
+**Solution:** Talked to TrueForge's own API directly. Three Zod validation
+errors taught us the exact request shape (each error message = free schema doc):
+
+```
+POST /api/v1/settings/mcp-servers
+{"manifest":{"type":"remote","name":"kubernetes",
+ "url":"http://127.0.0.1:9236/mcp","description":"...",
+ "auth":{"type":"header","headers":{"X-Sentinel-Local":"kind-demo"}}}}
+```
+
+→ `auth_status: authenticated`. Note: custom remotes REQUIRE ≥1 auth header;
+we send a harmless dummy that the k8s MCP ignores.
+
+**Evolution:** UI flakiness is survivable when the product has an honest API.
+Also documented in OPERATOR-SETUP.md so judges can reproduce setup via API if
+the dialog misbehaves for them too.
+
+### Entry 2.3 — Browser automation vs SPA session drops (workaround)
+
+**Problem:** The TrueForge SPA repeatedly dropped our automation browser's
+session ("empty page" snapshots mid-flow), losing dialog state twice.
+
+**Solution:** Re-navigate → wait ~10s for hydration → re-snapshot each time.
+For state changes, prefer the API route (Entry 2.2) over click-paths.
+
+### Status at end of Day 2 session
+
+- TrueForge running at :8790 ✓
+- kubernetes MCP connector registered & authenticated ✓
+- metrics-server installed (`--kubelet-insecure-tls` patched for kind), real
+  usage data flowing ✓
+- Pending user action: paste OpenRouter key (Settings → Models) + Daytona key
+  (Settings → Sandbox providers) — see docs/OPERATOR-SETUP.md
+
+---
+
 *(entries below are appended as each phase lands)*
 
 <!-- TEMPLATE FOR FUTURE ENTRIES

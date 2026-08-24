@@ -63,12 +63,17 @@ with zero log evidence.
 
 ### Phase 3 — METRICS (temporal correlation)
 
-Query Prometheus MCP around the incident window (default last 2h):
-- `container_memory_working_set_bytes` vs `.spec.containers[].resources.limits`
-- `kube_pod_container_status_restarts_total` rate
-- CPU throttling: `container_cpu_cfs_throttled_periods_total`
+Query live usage via the Kubernetes MCP (metrics-server backed):
+- `pods_top` / `nodes_top` — current CPU/memory per pod vs
+  `.spec.containers[].resources.limits` (fetch limits via `resources_get`)
+- Restart counters from `pods_get` (`containerStatuses[].restartCount`) sampled
+  across the investigation = restart rate
+- Compare working set against limit: consumption ≥ ~90% of limit ⇒ resource
+  pressure signature
 
 Goal: establish WHEN behavior changed and whether consumption crosses a limit.
+(A Prometheus/MCP-prometheus integration is planned; until then these
+metrics-server-backed tools are the metric evidence source.)
 
 ### Phase 4 — SANDBOX ANALYSIS (only when correlation isn't obvious)
 
