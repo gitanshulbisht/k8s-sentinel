@@ -30,3 +30,6 @@ __pycache__/
 
 # Saved webpage reference bulk assets stay, but nothing generated
 node_modules/
+
+# Saved webpage bulk assets — keep local only
+docs/reference/*_files/
