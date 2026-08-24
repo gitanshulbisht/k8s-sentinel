@@ -33,3 +33,6 @@ node_modules/
 
 # Saved webpage bulk assets — keep local only
 docs/reference/*_files/
+
+# Command Code app state (recreated constantly)
+.commandcode/
