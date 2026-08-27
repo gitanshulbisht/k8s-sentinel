@@ -1,0 +1,94 @@
+{
+  "text": "\ud83d\udea8 [SEV-2 ALERT] Incident Detected: INC-20260827-CRASHLOOP-DEMO",
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "\ud83d\udea8 K8s Sentinel \u2014 Autonomous Incident Triage Alert",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Incident ID:*\n`INC-20260827-CRASHLOOP-DEMO`"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Severity:*\n`SEV-2 (High)`"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Service:*\n`payments-api (Namespace: demo)`"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Autonomous MTTR:*\n`6.14 seconds`"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Root Cause Isolated (Confidence: 96%):*\nConfigMap `nginx-healthz` contained unrecognized directive `this_directive_does_not_exist 42;` at `/etc/nginx/conf.d/default.conf:3`, preventing container startup."
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Proposed Surgical Remediation (`mutating: true`):*\n```kubectl patch configmap nginx-healthz -n demo --type merge -p '{\"data\":{\"default.conf\":\"server { listen 80; location = /healthz { return 200 \\\"ok\\\\n\\\"; } }\"}}'\nkubectl rollout restart deployment/payments-api -n demo```"
+      }
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": "\ud83d\udee1\ufe0f *Human Approval Gate:* Execution is paused. Cluster state drift = `0 Bytes`."
+        }
+      ]
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "\u2713 Approve & Apply Patch",
+            "emoji": true
+          },
+          "style": "primary",
+          "value": "approve_remediation",
+          "action_id": "btn_approve"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "\u2715 Reject",
+            "emoji": true
+          },
+          "style": "danger",
+          "value": "reject_remediation",
+          "action_id": "btn_reject"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "\ud83d\udcca Open Incident Cockpit",
+            "emoji": true
+          },
+          "url": "http://localhost:8790",
+          "action_id": "btn_cockpit"
+        }
+      ]
+    }
+  ]
+}

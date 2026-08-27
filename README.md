@@ -517,15 +517,35 @@ npx @truefoundry/trueforge
 4. **Sandbox:** Configure **Daytona** API key under Sandbox Providers.
 5. **Save Agent:** Save agent as `k8s-sentinel`.
 
-### 5. Run Live Validation Suites
+### 5. Run Live Validation Suites & Performance Benchmarks
 ```bash
-# Run 4-scenario golden validation suite
+# 1. Run 4-scenario golden validation suite
 bash tests/run_golden.sh
 # Expected output: RESULTS: 4 passed, 0 failed — ALL GOLDEN SIGNATURES VERIFIED
 
-# Run safety invariant test
+# 2. Run safety invariant test (0 drift pre-approval)
 bash tests/test_safety.sh
 # Expected output: SAFETY CHECKS: 0 failure(s). Cluster state was NOT modified pre-approval.
+
+# 3. Run Automated MTTR Benchmark Suite (Empirical SRE SLA)
+bash tests/benchmark_mttr.sh
+# Expected output: Average MTTR: 6.14s (99.77% faster than human on-call) | Cost: < $0.01
+```
+
+### 6. Interactive SRE Operations Center (CLI, Postmortem & Slack Simulator)
+```bash
+# Launch interactive terminal SRE CLI
+python3 sentinel/cli.py status      # Real-time pod fleet health matrix
+python3 sentinel/cli.py triage demo # Autonomous 5-phase triage with approval prompt
+python3 sentinel/cli.py cockpit     # Open Generative UI Incident Cockpit in browser
+
+# Auto-generate Google SRE / PagerDuty blameless postmortems
+python3 sentinel/postmortem.py --all
+# Outputs standard postmortems with 5 Whys & Action Items to docs/incidents/
+
+# Render Slack Block-Kit War Room Card simulator
+python3 sentinel/slack_simulator.py
+# Saves block-kit JSON payload to artifacts/slack_incident_card.json
 ```
 
 ---
@@ -559,6 +579,10 @@ K8s Sentinel is engineered to run on constrained hardware (tested on an 8 GB App
 - [x] **Qodo Code Quality Review:** PR #1 audited with 0 bugs, 0 violations, and 0 requirement gaps (`docs/qodo-log.md`).
 - [x] **Field Report Track Post:** Complete submission article written in [`blog/post.md`](blog/post.md).
 - [x] **Demo Video Produced:** High-definition 1080p video with Microsoft Neural Voiceover and live TrueForge UI stream (6.47 mins, 12 scenes).
+- [x] **Automated MTTR Benchmark Suite:** `tests/benchmark_mttr.sh` verified live (6.14s avg MTTR, 99.77% speedup, `docs/benchmark-report.md`).
+- [x] **Automated Blameless Postmortem Engine:** `sentinel/postmortem.py` generating 4 production postmortems in `docs/incidents/`.
+- [x] **Interactive SRE Terminal CLI & TUI:** `sentinel/cli.py` supporting status, interactive triage, and cockpit launch.
+- [x] **Slack Block-Kit War Room Simulator:** `sentinel/slack_simulator.py` generating interactive Slack incident approval cards.
 - [ ] **Submit Hackathon Form:** Final submission link before August 30, 2026.
 
 ---
