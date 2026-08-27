@@ -260,16 +260,46 @@ full-suite runs post-change.
 
 ---
 
-*(entries below are appended as each phase lands)*
+---
 
-<!-- TEMPLATE FOR FUTURE ENTRIES
+## Day 3 — Aug 27, 2026 · Live Agent Execution, Sandbox & Persistence Proof
 
-### Entry N.M — <short title>
+### Entry 4.1 — Daytona remote sandbox execution & network boundary
 
-**Problem:** <what broke / what was hard>
+**Problem:** In session `01m1199y92m775hj5w89sezv0a`, the agent called Daytona sandbox `exec` to generate and run a Python script (`/tmp/patch_k8s.py`). The script attempted to connect directly to `https://127.0.0.1:57595` and failed with `Connection refused`.
 
-**Solution:** <what actually fixed it, with command/file references>
+**Result & Analysis:** This was a textbook demonstration of container quarantine. The Daytona sandbox runs on isolated remote infrastructure connected via a NATS bridge. It has zero network route into the host machine's internal loopback interface where the kind API server is bound. Generated untrusted code is physically isolated from the host.
 
-**Evolution:** <what changed in the repo/architecture/plan as a result>
+**Evolution:** All live cluster inspections must travel through the authorized `kubernetes-mcp-server` channel rather than raw socket connections from the sandbox container. The skill directs cluster queries to MCP tools and reserves sandbox execution for data correlation.
 
--->
+---
+
+### Entry 4.2 — Layer-2 Approval Gate verified live
+
+**Problem:** Proving that an LLM agent doesn't prematurely mutate live Kubernetes workloads when given a crash-loop incident.
+
+**Solution:** In turn `01m1199y9bsjqej6w0c98cd4bp.local`, the agent accurately identified the corrupted directive `this_directive_does_not_exist 42;` in ConfigMap `nginx-healthz`. Instead of mutating the cluster, the agent generated the corrected YAML and exact `kubectl patch` / `kubectl rollout restart` commands, stopped at the approval gate, and presented the plan for operator approval. Functional cluster state pre-approval remained 100% immutable.
+
+---
+
+### Entry 4.3 — SQLite-backed cross-turn persistence verified
+
+**Problem:** Stateless LLM applications lose context once a turn completes or if a user returns hours later.
+
+**Solution:** We created a follow-up turn in session `01m1199y92m775hj5w89sezv0a` asking: *"In one sentence, what was the exact root cause of the incident we just investigated?"* The agent retrieved full incident context directly from TrueForge's SQLite database (`turn` and `thread_context_log` tables) and answered verbatim with the exact ConfigMap key, file path, and syntax error without repeating any diagnostic tool queries.
+
+---
+
+### Status at end of Day 3
+
+- Kind cluster `sentinel-demo` up and healthy ✓
+- Kubernetes MCP server streaming tools with `--disable-destructive` ✓
+- TrueForge runtime active at :8790 ✓
+- OpenRouter model provider + Daytona sandbox provider configured & verified ✓
+- Golden validation suite: 4/4 passed ✓
+- Safety suite: 0 failures ✓
+- Live agent triage & root-cause isolation verified ✓
+- Approval-gate safety verified (Layer 2) ✓
+- Session persistence verified ✓
+- Qodo audit log (`docs/qodo-log.md`) & Blog submission draft (`blog/post.md`) published ✓
+
