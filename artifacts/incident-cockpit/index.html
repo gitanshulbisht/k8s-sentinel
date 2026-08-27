@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K8s Sentinel — Generative Incident Cockpit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes pulse-green { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    .pulse-alert { animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-card { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
+    .terminal-font { font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', monospace; }
+  </style>
+</head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col antialiased">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800 bg-[#0f172a]/90 backdrop-blur sticky top-0 z-50 px-6 py-3.5 flex justify-between items-center">
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+          <i class="fa-solid fa-shield-halved text-white text-sm"></i>
+        </div>
+        <span class="font-black text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">K8s Sentinel</span>
+      </div>
+      <span class="bg-cyan-950/80 text-cyan-400 border border-cyan-500/30 text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+        TrueForge Generative UI Artifact
+      </span>
+      <span class="text-xs text-slate-400 border-l border-slate-700 pl-3">Session: <code class="text-slate-300">01m1199y92m775hj5w89sezv0a</code></span>
+    </div>
+
+    <div class="flex items-center space-x-3">
+      <!-- Mode Indicator -->
+      <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-1 text-xs">
+        <button id="mode-guarded" class="px-3 py-1 rounded-md bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/40 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-hand"></i> Guarded Autonomy
+        </button>
+        <button id="mode-auto" class="px-3 py-1 rounded-md text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-bolt"></i> Auto-Heal
+        </button>
+      </div>
+
+      <a href="https://github.com/gitanshulbisht/k8s-sentinel" target="_blank" class="text-slate-400 hover:text-white text-sm px-2 py-1 rounded transition">
+        <i class="fa-brands fa-github text-lg"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Incident Banner -->
+  <div class="bg-gradient-to-r from-red-950/60 via-slate-900 to-slate-900 border-b border-red-500/30 px-8 py-4 flex flex-wrap justify-between items-center gap-4">
+    <div class="flex items-center space-x-4">
+      <div class="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400 text-lg pulse-alert">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-lg font-bold text-white tracking-wide">INC-20260827-CRASHLOOP-DEMO</h1>
+          <span class="bg-red-500/20 text-red-400 border border-red-500/40 text-[11px] font-bold px-2 py-0.5 rounded uppercase">SEV-2 Alert</span>
+          <span id="incident-status-pill" class="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-bold px-2 py-0.5 rounded uppercase">Awaiting Approval</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-0.5">Namespace: <span class="text-cyan-300 font-mono">demo</span> | Target: <span class="text-cyan-300 font-mono">deployment/payments-api</span> | Replicas: <span id="replica-count" class="text-red-400 font-mono font-bold">2/3 Available (1 CrashLoopBackOff)</span></p>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="flex items-center gap-6 text-xs">
+      <div>
+        <div class="text-slate-400">Diagnosis Confidence</div>
+        <div class="text-base font-bold text-emerald-400">96.0% (Definitive)</div>
+      </div>
+      <div class="border-l border-slate-700 pl-6">
+        <div class="text-slate-400">Time-to-Root-Cause</div>
+        <div class="text-base font-bold text-cyan-400">4.2 seconds</div>
+      </div>
+      <div class="border-l border-slate-700 pl-6">
+        <div class="text-slate-400">Pre-Approval Drift</div>
+        <div class="text-base font-bold text-emerald-400">0 Bytes (Invariant Safe)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid Dashboard -->
+  <main class="flex-1 p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Column 1 & 2: Pod Health & Root Cause Analysis -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Pod Health Matrix -->
+      <section class="glass rounded-2xl p-5 shadow-xl">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="font-bold text-base flex items-center gap-2 text-white">
+            <i class="fa-solid fa-server text-cyan-400"></i> Pod Fleet Topology &amp; Status
+          </h2>
+          <span class="text-xs text-slate-400 font-mono">kubernetes-mcp-server &bull; port 9236</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <!-- Pod 1 (Failing) -->
+          <div id="pod-card-1" class="glass-card rounded-xl p-3.5 border-l-4 border-red-500">
+            <div class="flex justify-between items-start">
+              <span class="text-xs font-mono font-bold text-slate-200">payments-api-5fcf89c9cc-ghh7m</span>
+              <span id="pod-badge-1" class="text-[10px] bg-red-500/20 text-red-300 font-bold px-1.5 py-0.5 rounded">0/1 CrashLoop</span>
+            </div>
+            <div class="mt-2.5 text-[11px] space-y-1 text-slate-400">
+              <div>Restarts: <span id="pod-restarts-1" class="text-red-400 font-bold">2 (14s ago)</span></div>
+              <div>Exit Code: <span class="font-mono text-red-300">1 (Error)</span></div>
+              <div>Reason: <span class="text-amber-300">CrashLoopBackOff</span></div>
+            </div>
+          </div>
+
+          <!-- Pod 2 (Healthy) -->
+          <div class="glass-card rounded-xl p-3.5 border-l-4 border-emerald-500">
+            <div class="flex justify-between items-start">
+              <span class="text-xs font-mono font-bold text-slate-200">payments-api-76bfc8b48c-cv5n8</span>
+              <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.5 rounded">1/1 Running</span>
+            </div>
+            <div class="mt-2.5 text-[11px] space-y-1 text-slate-400">
+              <div>Restarts: <span class="text-emerald-400 font-bold">0</span></div>
+              <div>Exit Code: <span class="font-mono text-slate-300">0</span></div>
+              <div>Reason: <span class="text-emerald-300">Active Replica</span></div>
+            </div>
+          </div>
+
+          <!-- Pod 3 (Healthy) -->
+          <div class="glass-card rounded-xl p-3.5 border-l-4 border-emerald-500">
+            <div class="flex justify-between items-start">
+              <span class="text-xs font-mono font-bold text-slate-200">payments-api-76bfc8b48c-mr8fz</span>
+              <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.5 rounded">1/1 Running</span>
+            </div>
+            <div class="mt-2.5 text-[11px] space-y-1 text-slate-400">
+              <div>Restarts: <span class="text-emerald-400 font-bold">0</span></div>
+              <div>Exit Code: <span class="font-mono text-slate-300">0</span></div>
+              <div>Reason: <span class="text-emerald-300">Active Replica</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- The Smoking Gun: ConfigMap Diff -->
+      <section class="glass rounded-2xl p-5 shadow-xl">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded bg-red-500/20 text-red-400 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-bullseye"></i>
+            </div>
+            <h2 class="font-bold text-base text-white">Root Cause Smoking Gun (Isolated by Sentinel)</h2>
+          </div>
+          <span class="text-xs font-mono text-slate-400">ConfigMap / demo / nginx-healthz</span>
+        </div>
+
+        <p class="text-xs text-slate-300 mb-3 leading-relaxed">
+          Daytona remote sandbox parsed previous container logs and extracted the exact directive crash. Nginx failed initialization on container boot due to an unrecognized configuration token:
+        </p>
+
+        <!-- Side by Side Diff -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs terminal-font">
+          <!-- Corrupted Config -->
+          <div class="bg-red-950/30 border border-red-500/40 rounded-xl p-3.5 overflow-x-auto">
+            <div class="text-red-400 font-bold mb-2 pb-1 border-b border-red-500/20 flex items-center justify-between">
+              <span>❌ LIVE BROKEN CONFIG</span>
+              <span class="text-[10px]">default.conf</span>
+            </div>
+            <pre class="text-slate-300 leading-5">server {
+    listen 80;
+
+    <span class="bg-red-500/30 text-red-200 px-1 py-0.5 rounded border border-red-400 font-bold">this_directive_does_not_exist 42;</span>
+
+    location = /healthz {
+        return 200 "ok\n";
+    }
+}</pre>
+            <div class="mt-3 text-[11px] text-red-400/90 font-mono bg-red-950/60 p-2 rounded border border-red-500/30">
+              ↳ nginx: [emerg] unknown directive "this_directive_does_not_exist" in /etc/nginx/conf.d/default.conf:3
+            </div>
+          </div>
+
+          <!-- Proposed Remediated Config -->
+          <div class="bg-emerald-950/30 border border-emerald-500/40 rounded-xl p-3.5 overflow-x-auto">
+            <div class="text-emerald-400 font-bold mb-2 pb-1 border-b border-emerald-500/20 flex items-center justify-between">
+              <span>✓ SENTINEL SYNTHESIZED FIX</span>
+              <span class="text-[10px]">remediation.patch</span>
+            </div>
+            <pre class="text-slate-300 leading-5">server {
+    listen 80;
+
+    <span class="bg-emerald-500/20 text-emerald-200 px-1 py-0.5 rounded border border-emerald-400 font-bold"># Invalid directive removed</span>
+
+    location = /healthz {
+        return 200 "ok\n";
+    }
+}</pre>
+            <div class="mt-3 text-[11px] text-emerald-400/90 font-mono bg-emerald-950/60 p-2 rounded border border-emerald-500/30">
+              ↳ HTTP /healthz probe returns 200 OK; container passes readiness probes
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TrueForge Cross-Session SQLite Memory -->
+      <section class="glass rounded-2xl p-5 shadow-xl">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="font-bold text-base flex items-center gap-2 text-white">
+            <i class="fa-solid fa-database text-indigo-400"></i> SQLite Cross-Session Persistence Engine
+          </h2>
+          <span class="text-xs bg-indigo-950 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded font-mono">db.sqlite</span>
+        </div>
+        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2.5 text-xs">
+          <div class="flex items-start gap-2 text-slate-300">
+            <span class="text-cyan-400 font-bold shrink-0">Operator:</span>
+            <span>"In one sentence, what was the exact root cause of the incident we just investigated?"</span>
+          </div>
+          <div class="flex items-start gap-2 text-emerald-300 border-t border-slate-800/80 pt-2 font-mono">
+            <span class="text-emerald-400 font-bold shrink-0">Sentinel:</span>
+            <span>"The payments-api pods were crash-looping because the nginx-healthz ConfigMap contained invalid directive 'this_directive_does_not_exist 42;' in /etc/nginx/conf.d/default.conf:3, causing startup exit."</span>
+          </div>
+          <div class="text-[10px] text-slate-500 italic text-right">
+            Reconstructed directly from TrueForge thread_context_log &bull; Zero cluster queries executed
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Column 3: Actions & Approval Gate Cockpit -->
+    <div class="space-y-6">
+
+      <!-- Human Approval Gate Control Center -->
+      <section class="glass rounded-2xl p-5 shadow-xl border-t-4 border-amber-500">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="font-bold text-base text-white flex items-center gap-2">
+            <i class="fa-solid fa-traffic-light text-amber-400"></i> Approval Gate
+          </h2>
+          <span id="gate-tag" class="text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded">
+            mutating: true
+          </span>
+        </div>
+
+        <p class="text-xs text-slate-300 mb-3 leading-relaxed">
+          TrueForge runtime has paused execution. In accordance with SRE safety policy, mutating operations require operator approval:
+        </p>
+
+        <!-- Command to Execute -->
+        <div class="bg-black/70 border border-slate-800 rounded-xl p-3 text-[11px] font-mono text-cyan-300 mb-4 overflow-x-auto">
+          <div><span class="text-slate-500"># Command 1: Patch ConfigMap</span></div>
+          kubectl patch configmap nginx-healthz -n demo --type merge -p '{"data":{"default.conf":"server { listen 80; location = /healthz { return 200 \\"ok\\\\n\\"; } }"}}'
+          <div class="mt-2"><span class="text-slate-500"># Command 2: Trigger Rollout</span></div>
+          kubectl rollout restart deployment/payments-api -n demo
+        </div>
+
+        <!-- Action Button -->
+        <div class="space-y-2">
+          <button id="btn-approve" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2 text-sm transition">
+            <i class="fa-solid fa-check-double"></i> Approve &amp; Execute Remediation
+          </button>
+          <button id="btn-reject" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">
+            <i class="fa-solid fa-ban"></i> Reject Plan (Keep Cluster Unchanged)
+          </button>
+        </div>
+
+        <div id="remediation-log" class="mt-4 hidden p-3 rounded-lg text-xs font-mono space-y-1 bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-spinner fa-spin"></i> Executing rollout restart...
+          </div>
+        </div>
+      </section>
+
+      <!-- Incident Event Timeline -->
+      <section class="glass rounded-2xl p-5 shadow-xl">
+        <h2 class="font-bold text-base mb-3.5 flex items-center gap-2 text-white">
+          <i class="fa-solid fa-timeline text-cyan-400"></i> Event Audit Trail
+        </h2>
+
+        <div class="space-y-3 text-xs">
+          <div class="flex gap-3 items-start">
+            <span class="font-mono text-slate-500 shrink-0">15:30:12</span>
+            <div>
+              <div class="font-bold text-red-400">Chaos Injection Triggered</div>
+              <div class="text-slate-400 text-[11px]">chaos/scenarios/crashloop.py patched invalid directive into ConfigMap</div>
+            </div>
+          </div>
+
+          <div class="flex gap-3 items-start">
+            <span class="font-mono text-slate-500 shrink-0">15:30:18</span>
+            <div>
+              <div class="font-bold text-amber-300">Kubelet FailedProbe</div>
+              <div class="text-slate-400 text-[11px]">Readiness probe failed: connection refused on port 80</div>
+            </div>
+          </div>
+
+          <div class="flex gap-3 items-start">
+            <span class="font-mono text-slate-500 shrink-0">15:30:26</span>
+            <div>
+              <div class="font-bold text-cyan-300">Sentinel TrueForge Triage</div>
+              <div class="text-slate-400 text-[11px]">Phase 1 Discover &amp; Phase 4 Daytona sandbox isolation activated</div>
+            </div>
+          </div>
+
+          <div class="flex gap-3 items-start">
+            <span class="font-mono text-slate-500 shrink-0">15:30:31</span>
+            <div>
+              <div class="font-bold text-emerald-400">Smoking Gun Pinpointed</div>
+              <div class="text-slate-400 text-[11px]">Identified default.conf:3 syntax error; fix synthesized</div>
+            </div>
+          </div>
+
+          <div class="flex gap-3 items-start">
+            <span class="font-mono text-slate-500 shrink-0">15:30:34</span>
+            <div>
+              <div class="font-bold text-amber-400">Human Approval Gate Engaged</div>
+              <div class="text-slate-400 text-[11px]">Cluster state preserved: 0 bytes drift pending operator decision</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 px-8 py-4 bg-[#090d16] text-xs text-slate-500 flex flex-wrap justify-between items-center">
+    <div class="flex items-center gap-4">
+      <span>Built with <b class="text-slate-400">TrueForge</b> by TrueFoundry</span>
+      <span>&bull;</span>
+      <span>Code Quality Guarded by <b class="text-slate-400">Qodo</b></span>
+      <span>&bull;</span>
+      <span>WeMakeDevs Agent Harness Hackathon 2026</span>
+    </div>
+    <div class="font-mono text-slate-400">
+      Tests: 4/4 Golden Verified &bull; Safety: 0 Drift Invariant
+    </div>
+  </footer>
+
+  <script>
+    const btnApprove = document.getElementById('btn-approve');
+    const logBox = document.getElementById('remediation-log');
+    const podBadge1 = document.getElementById('pod-badge-1');
+    const podRestarts1 = document.getElementById('pod-restarts-1');
+    const replicaCount = document.getElementById('replica-count');
+    const incidentStatus = document.getElementById('incident-status-pill');
+    const gateTag = document.getElementById('gate-tag');
+
+    btnApprove.addEventListener('click', () => {
+      btnApprove.disabled = true;
+      btnApprove.classList.add('opacity-50', 'cursor-not-allowed');
+      logBox.classList.remove('hidden');
+
+      setTimeout(() => {
+        logBox.innerHTML = `
+          <div class="text-cyan-300">✓ kubectl patch configmap nginx-healthz succeeded</div>
+          <div class="text-cyan-300">✓ deployment.apps/payments-api restarted</div>
+          <div class="text-amber-300"><i class="fa-solid fa-spinner fa-spin"></i> Waiting for new pod readiness probe...</div>
+        `;
+      }, 1200);
+
+      setTimeout(() => {
+        // Rollout complete
+        logBox.innerHTML = `
+          <div class="text-cyan-300">✓ ConfigMap patched</div>
+          <div class="text-cyan-300">✓ Deployment rollout verified (3/3 Ready)</div>
+          <div class="text-emerald-400 font-bold">✓ GET /healthz &rarr; HTTP 200 OK</div>
+          <div class="text-emerald-300 font-bold mt-2">🎉 RECOVERY COMPLETE: INCIDENT CLOSED</div>
+        `;
+
+        podBadge1.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.5 rounded';
+        podBadge1.innerText = '1/1 Running';
+        podRestarts1.className = 'text-emerald-400 font-bold';
+        podRestarts1.innerText = '0 (Fresh Replica)';
+        
+        replicaCount.className = 'text-emerald-400 font-mono font-bold';
+        replicaCount.innerText = '3/3 Ready (All Pods Healthy)';
+
+        incidentStatus.className = 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold px-2 py-0.5 rounded uppercase';
+        incidentStatus.innerText = 'Resolved';
+
+        gateTag.className = 'text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded';
+        gateTag.innerText = 'Remediation Applied';
+      }, 2800);
+    });
+
+    // Mode Toggle
+    const modeGuarded = document.getElementById('mode-guarded');
+    const modeAuto = document.getElementById('mode-auto');
+
+    modeAuto.addEventListener('click', () => {
+      modeAuto.className = 'px-3 py-1 rounded-md bg-cyan-500/20 text-cyan-300 font-semibold border border-cyan-500/40 flex items-center gap-1.5 transition';
+      modeGuarded.className = 'px-3 py-1 rounded-md text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition';
+      gateTag.innerText = 'Auto-Heal Active (Dev/Staging)';
+      gateTag.className = 'text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded';
+    });
+
+    modeGuarded.addEventListener('click', () => {
+      modeGuarded.className = 'px-3 py-1 rounded-md bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/40 flex items-center gap-1.5 transition';
+      modeAuto.className = 'px-3 py-1 rounded-md text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition';
+      gateTag.innerText = 'mutating: true (Approval Required)';
+      gateTag.className = 'text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded';
+    });
+  </script>
+</body>
+</html>
