@@ -10,17 +10,16 @@
 [![Field Report Track](https://img.shields.io/badge/Blog-Field_Report_Track_($1,000)-purple.svg)](blog/post.md)
 [![Safety Suite](https://img.shields.io/badge/Safety_Proof-0_Drift_Verified-brightgreen.svg)](docs/safety-proof.md)
 [![Golden Tests](https://img.shields.io/badge/Golden_Tests-4%2F4_Passed-success.svg)](tests/run_golden.sh)
-[![Demo Video](https://img.shields.io/badge/Demo_Video-1080p_MP4-orange.svg)](demo_video/k8s_sentinel_demo.mp4)
+[![Demo Video](https://img.shields.io/badge/Demo_Video-1080p_Neural_Voice-orange.svg)](#-demo-video--walkthrough)
 
 ---
 
 ## 📺 Demo Video & Walkthrough
 
-A high-definition 1080p demo video with studio-grade **Microsoft Neural Voice Narration** (`en-US-ChristopherNeural`) and real-time TrueForge application walkthrough is included directly in the repository:
+A high-definition 1080p demo video with studio-grade **Microsoft Neural Voice Narration** (`en-US-ChristopherNeural`) and real-time TrueForge application walkthrough has been produced for the hackathon:
 
-* **File Location:** [`demo_video/k8s_sentinel_demo.mp4`](demo_video/k8s_sentinel_demo.mp4)
 * **Duration:** 6.47 minutes (387.94 seconds)
-* **Specs:** 1080p Full HD (1920x1080), 25 fps, AAC Stereo 44.1 kHz, 11.83 MB.
+* **Specs:** 1080p Full HD (1920x1080), 25 fps, AAC Stereo 44.1 kHz
 * **12 Comprehensive Scenes:** Covers the 3 AM on-call problem, TrueForge harness architecture, 4-scenario chaos harness, live TrueForge web UI stream (`localhost:8790`), dynamic subagent spawning, quarantined Daytona sandbox execution, human approval gate, workload rollout recovery, cross-session SQLite memory, the **Generative UI Incident Cockpit**, the **Proactive 24/7 Watcher Daemon**, and **Autonomy & Cost Economics**.
 
 ---
@@ -466,14 +465,9 @@ Agent-Harness-TrueForge/
 │   ├── session-persistence.md     ← SQLite cross-session recall demonstration
 │   └── qodo-log.md                ← Qodo review audit log & ShellCheck compliance report
 │
-├── demo_video/                    ← 1080p demo video assets & generators
-│   ├── k8s_sentinel_demo.mp4      ← Final 1080p demo video (4.95 mins, Neural Voiceover)
-│   ├── generate_all_v2.py         ← Automated slide and video compilation pipeline
-│   ├── generate_neural_audio.py   ← Microsoft Neural TTS audio synthesis engine
-│   ├── capture_real_ui.js         ← Puppeteer automation capturing live TrueForge UI
-│   ├── slides_v2/                 ← 1080p high-resolution slide frames
-│   ├── neural_audio/              ← High-fidelity MP3 speech tracks
-│   └── tf_captures/               ← Raw TrueForge web UI captures
+├── artifacts/                     ← Generative UI incident cockpit & preview assets
+├── watcher/                       ← Proactive 24/7 event watcher daemon
+
 │
 └── blog/                          ← Hackathon submissions
     └── post.md                    ← Complete Field Report Track article ($1,000 Keychron)
@@ -564,7 +558,7 @@ K8s Sentinel is engineered to run on constrained hardware (tested on an 8 GB App
 - [x] **Cross-Session SQLite Persistence:** Documented and verified in [`docs/session-persistence.md`](docs/session-persistence.md).
 - [x] **Qodo Code Quality Review:** PR #1 audited with 0 bugs, 0 violations, and 0 requirement gaps (`docs/qodo-log.md`).
 - [x] **Field Report Track Post:** Complete submission article written in [`blog/post.md`](blog/post.md).
-- [x] **Demo Video Produced:** High-definition 1080p video with Microsoft Neural Voiceover and live TrueForge UI stream (`demo_video/k8s_sentinel_demo.mp4`).
+- [x] **Demo Video Produced:** High-definition 1080p video with Microsoft Neural Voiceover and live TrueForge UI stream (6.47 mins, 12 scenes).
 - [ ] **Submit Hackathon Form:** Final submission link before August 30, 2026.
 
 ---
