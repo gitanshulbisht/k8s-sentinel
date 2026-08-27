@@ -332,8 +332,7 @@ Full constraint log in JOURNEY.md.
 - [x] Agent-level triage run + approval-gate proof (Layer 2 verified)
 - [x] Cross-session persistence demo verified (`docs/session-persistence.md`)
 - [x] Qodo code quality review log published (`docs/qodo-log.md`)
-- [x] Blog post draft published (`blog/post.md`)
-- [ ] Demo video recording
+- [x] Demo video produced (`demo_video/k8s_sentinel_demo.mp4`, 1080p, text overlays, AI voiceover)
 - [ ] Hackathon submission form (before Aug 30)
 
 ---
