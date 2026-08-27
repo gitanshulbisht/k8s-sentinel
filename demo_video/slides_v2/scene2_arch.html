@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1920px; height: 1080px;
+    background: radial-gradient(circle at 50% 15%, #172554 0%, #0b0f19 75%);
+    color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 60px 80px; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .header { display: flex; justify-content: space-between; align-items: center; }
+  .badge {
+    background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4);
+    color: #38bdf8; padding: 8px 18px; border-radius: 9999px; font-weight: 600; font-size: 18px;
+  }
+  h1 { font-size: 50px; font-weight: 800; color: #ffffff; margin-top: 10px; }
+  h1 span { background: linear-gradient(135deg, #60a5fa, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  p.subtitle { font-size: 22px; color: #94a3b8; margin-top: 6px; }
+
+  .arch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 30px; }
+  .arch-card {
+    background: rgba(15, 23, 42, 0.85); border-radius: 18px; padding: 28px;
+    border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; justify-content: space-between; height: 480px;
+  }
+  .card-1 { border-top: 5px solid #38bdf8; }
+  .card-2 { border-top: 5px solid #818cf8; }
+  .card-3 { border-top: 5px solid #c084fc; }
+  .card-4 { border-top: 5px solid #34d399; }
+  
+  .arch-icon { font-size: 38px; margin-bottom: 15px; }
+  .arch-title { font-size: 22px; font-weight: 700; color: #f8fafc; margin-bottom: 12px; }
+  .arch-desc { font-size: 16px; color: #94a3b8; line-height: 1.5; margin-bottom: 18px; }
+  
+  .tag-list { display: flex; flex-direction: column; gap: 8px; }
+  .tag {
+    background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px;
+    font-size: 14px; font-family: monospace; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .footer-overlay {
+    background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(255,255,255,0.1);
+    padding: 16px 28px; border-radius: 14px; font-size: 20px; font-weight: 500;
+    color: #e2e8f0; display: flex; align-items: center; gap: 12px;
+  }
+  .pulse-dot { width: 12px; height: 12px; border-radius: 50%; background: #60a5fa; box-shadow: 0 0 12px #60a5fa; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="badge">Architecture Overview</div>
+    <div style="color: #94a3b8; font-size: 18px;">TrueForge Harness · Daytona · Kind · Qodo</div>
+  </div>
+  
+  <div>
+    <h1>Why TrueForge Is <span>Load-Bearing</span></h1>
+    <p class="subtitle">A complete runtime ecosystem designed specifically for mission-critical SRE operations</p>
+  </div>
+  
+  <div class="arch-grid">
+    <div class="arch-card card-1">
+      <div>
+        <div class="arch-icon">⚙️</div>
+        <div class="arch-title">TrueForge Harness</div>
+        <div class="arch-desc">Single-process Node runtime orchestrating tools, subagents, and sessions.</div>
+      </div>
+      <div class="tag-list">
+        <div class="tag">Dynamic Subagents</div>
+        <div class="tag">SQLite Session Store</div>
+        <div class="tag">SKILL.md Playbook</div>
+      </div>
+    </div>
+    
+    <div class="arch-card card-2">
+      <div>
+        <div class="arch-icon">🔌</div>
+        <div class="arch-title">Kubernetes MCP</div>
+        <div class="arch-desc">Streamable HTTP MCP connector providing live cluster introspection.</div>
+      </div>
+      <div class="tag-list">
+        <div class="tag">pods_get / resources_get</div>
+        <div class="tag">events_list / logs</div>
+        <div class="tag">--disable-destructive</div>
+      </div>
+    </div>
+    
+    <div class="arch-card card-3">
+      <div>
+        <div class="arch-icon">📦</div>
+        <div class="arch-title">Daytona Sandbox</div>
+        <div class="arch-desc">Isolated code execution container connected via NATS bridge.</div>
+      </div>
+      <div class="tag-list">
+        <div class="tag">Zero Host Network Access</div>
+        <div class="tag">Generated Python Scripts</div>
+        <div class="tag">Automated Quarantine</div>
+      </div>
+    </div>
+    
+    <div class="arch-card card-4">
+      <div>
+        <div class="arch-icon">🚦</div>
+        <div class="arch-title">Human Approval Gate</div>
+        <div class="arch-desc">Runtime-enforced barrier intercepting all state-mutating actions.</div>
+      </div>
+      <div class="tag-list">
+        <div class="tag">Plan Text Only</div>
+        <div class="tag">mutating: true Flagging</div>
+        <div class="tag">Guarded by Qodo Review</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer-overlay">
+    <div class="pulse-dot"></div>
+    <span><b>Part 2: Architecture</b> &mdash; Defense-in-depth safety: Read-only MCP + Remote Sandbox + Human Approval Gate</span>
+  </div>
+</body>
+</html>
