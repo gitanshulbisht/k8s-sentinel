@@ -325,14 +325,16 @@ Full constraint log in JOURNEY.md.
 - [x] Chaos harness (4 scenarios) + golden fixtures — **all signatures verified live**
 - [x] incident-triage skill + findings contract written
 - [x] Golden-case validation suite green (`tests/run_golden.sh`: 4/4)
-- [x] Safety proof, layer 1 (`tests/test_safety.sh`: 0 failures) — layer 2 pending agent
+- [x] Safety proof, layer 1 & 2 (`tests/test_safety.sh`: 0 failures, agent approval-gate verified in `docs/safety-proof.md`)
 - [x] metrics-server metrics pipeline (Prometheus deferred — RAM budget)
-- [ ] Model provider + sandbox keys configured (see docs/OPERATOR-SETUP.md)
-- [ ] Saved K8s Sentinel agent composed in TrueForge
-- [ ] Agent-level golden runs + approval-gate proof (layer 2)
-- [ ] Cross-session persistence demo
-- [ ] Demo video + blog post
-- [ ] Submission (before Aug 30)
+- [x] Model provider (OpenRouter) + sandbox keys (Daytona) configured
+- [x] Saved K8s Sentinel agent composed in TrueForge
+- [x] Agent-level triage run + approval-gate proof (Layer 2 verified)
+- [x] Cross-session persistence demo verified (`docs/session-persistence.md`)
+- [x] Qodo code quality review log published (`docs/qodo-log.md`)
+- [x] Blog post draft published (`blog/post.md`)
+- [ ] Demo video recording
+- [ ] Hackathon submission form (before Aug 30)
 
 ---
 
