@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1920px; height: 1080px;
+    background: #0b0f19; color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 50px 70px; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .header { display: flex; justify-content: space-between; align-items: center; }
+  .badge {
+    background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4);
+    color: #c084fc; padding: 8px 18px; border-radius: 9999px; font-weight: 600; font-size: 18px;
+  }
+  h1 { font-size: 46px; font-weight: 800; color: #ffffff; margin-top: 8px; }
+  h1 span { color: #c084fc; }
+  p.subtitle { font-size: 20px; color: #94a3b8; }
+
+  .split { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 30px; margin-top: 25px; }
+  .window {
+    background: #020617; border-radius: 14px; border: 1px solid #1e293b;
+    overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6); height: 500px;
+  }
+  .term-bar {
+    background: #0f172a; padding: 12px 18px; display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid #1e293b; font-family: monospace; font-size: 14px; color: #94a3b8;
+  }
+  .dots { display: flex; gap: 6px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #ef4444; } .dot-y { background: #f59e0b; } .dot-g { background: #10b981; }
+  .term-content {
+    padding: 22px; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 15px;
+    line-height: 1.6; color: #e2e8f0; height: calc(100% - 45px); overflow: hidden;
+  }
+
+  .flow-card {
+    background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 18px; margin-bottom: 14px;
+  }
+  .flow-step { font-size: 15px; font-weight: bold; color: #f8fafc; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+  .flow-desc { font-size: 13px; color: #94a3b8; line-height: 1.4; }
+
+  .footer-overlay {
+    background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(255,255,255,0.1);
+    padding: 16px 28px; border-radius: 14px; font-size: 20px; font-weight: 500;
+    color: #e2e8f0; display: flex; align-items: center; gap: 12px;
+  }
+  .pulse-dot { width: 12px; height: 12px; border-radius: 50%; background: #c084fc; box-shadow: 0 0 12px #c084fc; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="badge">Autonomous Daemon</div>
+    <div style="color: #94a3b8; font-size: 18px;">Proactive 24/7 Cluster Watcher</div>
+  </div>
+  
+  <div>
+    <h1>Proactive 24/7 Watcher &amp; <span>Event Ingestion</span></h1>
+    <p class="subtitle">Autonomous event stream monitoring without human chat intervention</p>
+  </div>
+  
+  <div class="split">
+    <div class="window">
+      <div class="term-bar">
+        <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+        <span style="margin-left: 10px;">python3 watcher/sentinel_watcher.py</span>
+      </div>
+      <div class="term-content">
+        <span style="color: #38bdf8;">[15:30:10] [SENTINEL-WATCHER]</span> Starting cluster watcher on namespace 'demo'...<br>
+        <span style="color: #38bdf8;">[15:30:10] [SENTINEL-WATCHER]</span> Listening for triggers: BackOff, OOMKilling, FailedProbe<br>
+        <span style="color: #94a3b8;">[15:30:18] streaming kubectl events --watch-only...</span><br><br>
+        <span style="color: #ef4444; font-weight: bold;">[15:30:24] [SENTINEL-WATCHER] 🚨 ANOMALY DETECTED:</span><br>
+        &nbsp;&nbsp;↳ Target: <span style="color: #f8fafc;">payments-api-5fcf89c9cc-ghh7m</span> &rarr; <span style="color: #f87171;">BackOff</span><br>
+        &nbsp;&nbsp;↳ Reason: Back-off restarting failed container<br><br>
+        <span style="color: #34d399; font-weight: bold;">[15:30:25] [SENTINEL-WATCHER] ✓ Dispatching to TrueForge API:</span><br>
+        &nbsp;&nbsp;↳ POST http://localhost:8790/api/sessions<br>
+        &nbsp;&nbsp;↳ Created session: <span style="color: #38bdf8;">01m1199y92m775hj5w89sezv0a</span><br>
+        &nbsp;&nbsp;↳ Agent K8s Sentinel triage activated autonomously!
+      </div>
+    </div>
+    
+    <div class="window" style="padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+      <div class="flow-card" style="border-left: 4px solid #ef4444;">
+        <div class="flow-step"><span style="color: #ef4444;">1.</span> Real-Time Event Stream</div>
+        <div class="flow-desc">Streams Kubelet events directly without polling overhead. Catches pod crashes in sub-second time.</div>
+      </div>
+      
+      <div class="flow-card" style="border-left: 4px solid #c084fc;">
+        <div class="flow-step"><span style="color: #c084fc;">2.</span> Autonomous API Dispatch</div>
+        <div class="flow-desc">Calls TrueForge session creation API automatically. Zero human prompt typing required.</div>
+      </div>
+      
+      <div class="flow-card" style="border-left: 4px solid #34d399;">
+        <div class="flow-step"><span style="color: #34d399;">3.</span> SRE Triage Before Alert Paging</div>
+        <div class="flow-desc">Sentinel completes triage and isolates the smoking gun before the engineer even opens their laptop!</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer-overlay">
+    <div class="pulse-dot"></div>
+    <span><b>Proactive Sentinel:</b> Moving from a passive chatbot to an active, autonomous 24/7 SRE infrastructure watchdog</span>
+  </div>
+</body>
+</html>

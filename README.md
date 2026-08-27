@@ -19,9 +19,9 @@
 A high-definition 1080p demo video with studio-grade **Microsoft Neural Voice Narration** (`en-US-ChristopherNeural`) and real-time TrueForge application walkthrough is included directly in the repository:
 
 * **File Location:** [`demo_video/k8s_sentinel_demo.mp4`](demo_video/k8s_sentinel_demo.mp4)
-* **Duration:** 4.95 minutes (296.94 seconds)
-* **Specs:** 1080p Full HD (1920x1080), 25 fps, AAC Stereo 44.1 kHz, 9.04 MB.
-* **Content:** Covers the 3 AM on-call problem, complete TrueForge harness architecture, 4-scenario chaos harness, live TrueForge web UI stream (`localhost:8790`), dynamic subagent spawning, quarantined Daytona sandbox execution, human approval gate, workload rollout recovery, and cross-session SQLite memory.
+* **Duration:** 6.47 minutes (387.94 seconds)
+* **Specs:** 1080p Full HD (1920x1080), 25 fps, AAC Stereo 44.1 kHz, 11.83 MB.
+* **12 Comprehensive Scenes:** Covers the 3 AM on-call problem, TrueForge harness architecture, 4-scenario chaos harness, live TrueForge web UI stream (`localhost:8790`), dynamic subagent spawning, quarantined Daytona sandbox execution, human approval gate, workload rollout recovery, cross-session SQLite memory, the **Generative UI Incident Cockpit**, the **Proactive 24/7 Watcher Daemon**, and **Autonomy & Cost Economics**.
 
 ---
 
@@ -35,13 +35,15 @@ A high-definition 1080p demo video with studio-grade **Microsoft Neural Voice Na
 6. [The 5-Phase Incident Triage Playbook](#the-5-phase-incident-triage-playbook)
 7. [Chaos Engineering Harness & Golden Signatures](#chaos-engineering-harness--golden-signatures)
 8. [The Findings Contract (Structured Output Spec)](#the-findings-contract-structured-output-spec)
-9. [Defense-in-Depth Safety Architecture](#defense-in-depth-safety-architecture)
-10. [Cross-Session Persistence Engine (SQLite)](#cross-session-persistence-engine-sqlite)
-11. [Code Quality Process & Qodo Review Audit](#code-quality-process--qodo-review-audit)
-12. [Repository Structure](#repository-structure)
-13. [Quickstart & Reproduction Guide](#quickstart--reproduction-guide)
-14. [Hardware & Resource Budget (8 GB Mac Optimized)](#hardware--resource-budget-8-gb-mac-optimized)
-15. [Hackathon Submission Roadmap](#hackathon-submission-roadmap)
+9. [Generative UI: The Interactive Incident Cockpit](#generative-ui-the-interactive-incident-cockpit)
+10. [Proactive 24/7 Watcher: Autonomous Event-Driven SRE](#proactive-247-watcher-autonomous-event-driven-sre)
+11. [Defense-in-Depth Safety Architecture](#defense-in-depth-safety-architecture)
+12. [Cross-Session Persistence Engine (SQLite)](#cross-session-persistence-engine-sqlite)
+13. [Code Quality Process & Qodo Review Audit](#code-quality-process--qodo-review-audit)
+14. [Repository Structure](#repository-structure)
+15. [Quickstart & Reproduction Guide](#quickstart--reproduction-guide)
+16. [Hardware & Resource Budget (8 GB Mac Optimized)](#hardware--resource-budget-8-gb-mac-optimized)
+17. [Hackathon Submission Roadmap](#hackathon-submission-roadmap)
 
 ---
 
@@ -337,6 +339,41 @@ Every triage investigation concludes with a structured JSON document conforming 
 ```
 
 ---
+
+---
+
+## Generative UI: The Interactive Incident Cockpit
+
+Beyond conversational text responses and structured JSON findings, K8s Sentinel utilizes TrueForge's **Generative UI / Web Artifacts** capabilities to synthesize an interactive, standalone **Incident Cockpit**:
+
+![Incident Cockpit Preview](artifacts/incident-cockpit/preview.png)
+
+* **Interactive File:** [`artifacts/incident-cockpit/index.html`](artifacts/incident-cockpit/index.html)
+* **High-Res Preview:** [`artifacts/incident-cockpit/preview.png`](artifacts/incident-cockpit/preview.png)
+
+### Key Cockpit Features:
+1. **Pod Fleet Topology & Health:** Visual representation of all replicas (`0/1 CrashLoopBackOff` vs `1/1 Running`), showing container exit codes and restart counters.
+2. **Side-by-Side Root Cause Diff:** Color-coded comparison showing the live broken ConfigMap directive (`this_directive_does_not_exist 42;` highlighted in red) versus the Sentinel-synthesized remediation patch in green.
+3. **Interactive Approval Gate Simulator:** Features an interactive **"Approve & Execute Remediation"** button that runs a real-time rollout simulation—transitioning failing pods back to `1/1 Running`, verifying the `/healthz` probe returns `200 OK`, and closing the incident.
+4. **Autonomy Mode Switcher:** Toggle between **Guarded Autonomy** (Human-in-the-loop) and **Auto-Heal Mode** (autonomous closed-loop healing for dev/staging).
+5. **Event Audit Trail:** Chronological timeline showing Kubelet event sequences aligned with TrueForge triage timestamps.
+
+---
+
+## Proactive 24/7 Watcher: Autonomous Event-Driven SRE
+
+While K8s Sentinel can be triggered via TrueForge's chat UI, real SRE operations require autonomous event-driven dispatch. We built [`watcher/sentinel_watcher.py`](watcher/sentinel_watcher.py) to provide continuous, autonomous cluster surveillance:
+
+```bash
+# Start background watcher daemon
+python3 watcher/sentinel_watcher.py
+```
+
+### How the Watcher Works:
+1. **Zero-Overhead Event Streaming:** Streams Kubernetes warning events via `kubectl get events --watch-only -n demo`.
+2. **Signature Matching:** Detects critical failure triggers (`BackOff`, `OOMKilling`, `FailedProbe`, `FailedMount`, `ErrImagePull`).
+3. **Autonomous API Dispatch:** The instant an anomaly occurs, the watcher **automatically dispatches a triage session via TrueForge's HTTP API** (`POST http://localhost:8790/api/sessions`).
+4. **Zero-Human MTTD:** Triage is initiated, the root cause is isolated, and the remediation plan is waiting at the approval gate before the on-call engineer even opens their laptop!
 
 ## Defense-in-Depth Safety Architecture
 
