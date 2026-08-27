@@ -539,6 +539,15 @@ python3 sentinel/cli.py status      # Real-time pod fleet health matrix
 python3 sentinel/cli.py triage demo # Autonomous 5-phase triage with approval prompt
 python3 sentinel/cli.py cockpit     # Open Generative UI Incident Cockpit in browser
 
+# Ephemeral Pre-Flight Canary Verification (Sandbox dry-run before production rollout)
+python3 sentinel/cli.py canary
+
+# Formulate GitOps-First PR Manifest (ArgoCD/Flux zero-drift remediation)
+python3 sentinel/cli.py gitops
+
+# Launch Prometheus Alertmanager Webhook Receiver
+python3 sentinel/cli.py webhook --simulate
+
 # Auto-generate Google SRE / PagerDuty blameless postmortems
 python3 sentinel/postmortem.py --all
 # Outputs standard postmortems with 5 Whys & Action Items to docs/incidents/
@@ -583,6 +592,9 @@ K8s Sentinel is engineered to run on constrained hardware (tested on an 8 GB App
 - [x] **Automated Blameless Postmortem Engine:** `sentinel/postmortem.py` generating 4 production postmortems in `docs/incidents/`.
 - [x] **Interactive SRE Terminal CLI & TUI:** `sentinel/cli.py` supporting status, interactive triage, and cockpit launch.
 - [x] **Slack Block-Kit War Room Simulator:** `sentinel/slack_simulator.py` generating interactive Slack incident approval cards.
+- [x] **GitOps-First PR Remediation Engine:** `sentinel/gitops_pr.py` generating ArgoCD/Flux compatible pull requests in `artifacts/gitops_prs/`.
+- [x] **Prometheus Alertmanager Webhook Receiver:** `sentinel/alertmanager_receiver.py` providing autonomous event-driven triage on port 9099.
+- [x] **Ephemeral Pre-Flight Canary Sandbox:** `sentinel/dry_run.py` verifying patches in an isolated pod before human approval.
 - [ ] **Submit Hackathon Form:** Final submission link before August 30, 2026.
 
 ---

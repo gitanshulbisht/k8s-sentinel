@@ -150,6 +150,9 @@ def main():
     {C_CYAN}cockpit{C_RESET}      Launch the interactive Generative UI Incident Cockpit
     {C_CYAN}benchmark{C_RESET}    Run the automated MTTR Benchmark Suite (4 scenarios)
     {C_CYAN}postmortem{C_RESET}   Generate Google SRE / PagerDuty blameless postmortems
+    {C_CYAN}canary{C_RESET}       Run ephemeral pre-flight canary verification in sandbox
+    {C_CYAN}gitops{C_RESET}       Formulate GitOps-first PR manifest update (ArgoCD/Flux)
+    {C_CYAN}webhook{C_RESET}      Start Prometheus Alertmanager webhook receiver daemon
 """)
         sys.exit(0)
         
@@ -165,6 +168,15 @@ def main():
         cmd_benchmark()
     elif cmd == "postmortem":
         cmd_postmortem()
+    elif cmd in ("canary", "dry-run"):
+        script = os.path.join(REPO_ROOT, "sentinel/dry_run.py")
+        subprocess.run(["python3", script])
+    elif cmd == "gitops":
+        script = os.path.join(REPO_ROOT, "sentinel/gitops_pr.py")
+        subprocess.run(["python3", script] + sys.argv[2:])
+    elif cmd in ("webhook", "alertmanager"):
+        script = os.path.join(REPO_ROOT, "sentinel/alertmanager_receiver.py")
+        subprocess.run(["python3", script] + sys.argv[2:])
     else:
         print(f"Unknown command '{cmd}'. Run 'python3 sentinel/cli.py help' for usage.")
 
