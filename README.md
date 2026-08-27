@@ -18,9 +18,9 @@
 
 A high-definition 1080p demo video with studio-grade **Microsoft Neural Voice Narration** (`en-US-ChristopherNeural`) and real-time TrueForge application walkthrough has been produced for the hackathon:
 
-* **Duration:** 8.52 minutes (511.34 seconds)
-* **Specs:** 1080p Full HD (1920x1080), 25 fps, AAC Stereo 44.1 kHz, 15.47 MB
-* **15 Comprehensive Scenes:** Covers the 3 AM on-call problem, TrueForge harness architecture, 4-scenario chaos harness, live TrueForge web UI stream (`localhost:8790`), dynamic subagent spawning, quarantined Daytona sandbox execution, human approval gate, workload rollout recovery, cross-session SQLite memory, the **Generative UI Incident Cockpit**, the **Proactive 24/7 Watcher Daemon**, **Autonomy & Cost Economics**, **Enterprise SRE Suite (GitOps, Alertmanager, Ephemeral Canary)**, **System Optimizations (Log Distillation, DeepSeek Cascade Routing, SQLite FTS5 RAG)**, and **Empirical MTTR Benchmark & SLA Scorecard**.
+* **Duration:** 9.99 minutes (599.10 seconds)
+* **Specs:** 1080p Full HD (1920x1080), 25 fps, AAC Stereo 44.1 kHz, 18.20 MB
+* **17 Comprehensive Scenes:** Covers the 3 AM on-call problem, TrueForge harness architecture, 4-scenario chaos harness, live TrueForge web UI stream (`localhost:8790`), dynamic subagent spawning, quarantined Daytona sandbox execution, human approval gate, workload rollout recovery, cross-session SQLite memory, the **Generative UI Incident Cockpit**, the **Proactive 24/7 Watcher Daemon**, **Autonomy & Cost Economics**, **Enterprise SRE Suite (GitOps, Alertmanager, Ephemeral Canary)**, **System Optimizations (Log Distillation, DeepSeek Cascade Routing, SQLite FTS5 RAG)**, **Empirical MTTR Benchmark & SLA Scorecard**, **Native Kubernetes CRD & Policy-as-Code Guardrails**, and **Interactive Live Demo Simulator & GitHub Actions CI/CD**.
 
 ---
 
@@ -705,7 +705,7 @@ K8s Sentinel is engineered to run on constrained hardware (tested on an 8 GB App
 - [x] **Cross-Session SQLite Persistence:** Documented and verified in [`docs/session-persistence.md`](docs/session-persistence.md).
 - [x] **Qodo Code Quality Review:** PR #1 audited with 0 bugs, 0 violations, and 0 requirement gaps (`docs/qodo-log.md`).
 - [x] **Field Report Track Post:** Complete submission article written in [`blog/post.md`](blog/post.md).
-- [x] **Demo Video Produced:** High-definition 1080p video with Microsoft Neural Voiceover, live TrueForge UI stream, Generative UI Cockpit, and 3 SRE pillars (8.52 mins, 15 scenes).
+- [x] **Demo Video Produced:** High-definition 1080p video with Microsoft Neural Voiceover, live TrueForge UI stream, Generative UI Cockpit, CRD Operator, and Policy Guardrails (9.99 mins, 17 scenes).
 - [x] **Automated MTTR Benchmark Suite:** `tests/benchmark_mttr.sh` verified live (6.14s avg MTTR, 99.77% speedup, `docs/benchmark-report.md`).
 - [x] **Automated Blameless Postmortem Engine:** `sentinel/postmortem.py` generating 4 production postmortems in `docs/incidents/`.
 - [x] **Interactive SRE Terminal CLI & TUI:** `sentinel/cli.py` supporting status, interactive triage, and cockpit launch.

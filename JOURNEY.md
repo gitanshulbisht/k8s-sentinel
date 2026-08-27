@@ -356,6 +356,47 @@ full-suite runs post-change.
 
 ---
 
+### Entry 5.8 — The Kubernetes-Native API Gap: Custom Resource Definitions (CRD)
+
+**Problem:** While external CLIs and web dashboards are helpful, real Kubernetes operators and platform engineers live in `kubectl`. Storing incidents purely in SQLite or an external UI creates an impedance mismatch with cloud-native workflows.
+
+**Solution:** We implemented `infra/crd/incident-remediation-crd.yaml` and `sentinel/crd_operator.py`. Sentinel now registers the `IncidentRemediation` custom resource (`sentinel.sre.io/v1alpha1`) directly with the Kubernetes API server. SREs can run `kubectl get incidents -A -o wide` to inspect active incidents, query root causes and smoking guns with `kubectl describe incident`, and even approve remediation by patching the CR (`kubectl patch incident <name> --type merge -p '{"spec":{"approvalStatus":"Approved"}}'`), which the Sentinel operator reconciles automatically.
+
+---
+
+### Entry 5.9 — Securing AI Autonomy: Policy-as-Code Guardrails (OPA / Kyverno)
+
+**Problem:** In enterprise production, security teams (SecOps) will not allow an autonomous AI agent to mutate clusters without cryptographic policy enforcement. What if an LLM hallucination suggests a patch that runs as root, mounts the host docker socket, or enables privileged container mode?
+
+**Solution:** We built `sentinel/policy_guard.py`. Before any AI-synthesized remediation is presented at the human approval gate, Sentinel runs an automated policy audit enforcing 5 zero-trust invariants:
+1. `SEC-01`: Non-root execution (`runAsUser: 0` rejected).
+2. `SEC-02`: No privilege escalation (`privileged: true` and `hostNetwork: true` blocked).
+3. `SEC-03`: No dangerous host mounts (`/root`, `/var/run/docker.sock` blocked).
+4. `SEC-04`: Resource limits bounded (`<= 1Gi`).
+5. `SEC-05`: Whitelisted official container registries.
+If any rule fails, the patch is blocked immediately with a non-compliant audit verdict.
+
+---
+
+### Entry 5.10 — Zero-Flake CI/CD: Headless Kind Clusters in GitHub Actions
+
+**Problem:** Demonstrating that an agent works on a local developer laptop is insufficient for production credibility. Hackathon judges need proof of 100% automated reproducibility on clean infrastructure.
+
+**Solution:** We authored `.github/workflows/sentinel-ci.yml`. On every push and pull request, GitHub Actions launches a headless Ubuntu runner, spins up a fresh Kind Kubernetes cluster, deploys the fragile demo application, installs the Sentinel CRD, and runs the entire automated test suite:
+* POSIX ShellCheck linter across all scripts.
+* `tests/test_safety.sh` (verifying 0 pre-approval cluster drift).
+* `tests/run_golden.sh` (validating 4/4 chaos scenarios).
+* Policy-as-code security audits & ephemeral canary sandbox tests.
+* Qodo PR review status check.
+
+---
+
+### Entry 5.11 — The Evaluator Experience: Interactive Live Demo Simulator
+
+**Problem:** Hackathon judges evaluating dozens of projects have only 2–3 minutes per submission. Asking them to configure environment variables, start daemons, and remember 10 different CLI flags creates friction.
+
+**Solution:** We built `sentinel/simulator.py` (`python3 sentinel/cli.py simulator`). It provides an interactive terminal dashboard allowing any judge to test all 12 platform capabilities—from live crashloop triage and CRD inspection to pre-flight canary sandboxes and MTTR benchmarks—with a single keystroke.
+
 ### Status at Final Hackathon Milestone
 
 - Kind cluster `sentinel-demo` up and healthy ✓
