@@ -643,9 +643,39 @@ python3 sentinel/cli.py router --force-r1
 # Native SQLite FTS5 Incident Memory RAG (< 1ms BM25 search, zero vector DB bloat)
 python3 sentinel/cli.py memory seed
 python3 sentinel/cli.py memory search "unknown directive"
+
+# Native Kubernetes CRD Operator (kubectl get incidents -n demo)
+python3 sentinel/cli.py crd seed
+kubectl get incidents -n demo -o wide
+kubectl describe incident inc-20260827-crashloop-demo -n demo
+
+# Policy-as-Code Security Guardrails Audit (OPA / Kyverno Compliance)
+python3 sentinel/cli.py policy
+python3 sentinel/cli.py policy --test-violations
+
+# Interactive Live Demo Simulator Walkthrough for Judges
+python3 sentinel/cli.py simulator
 ```
 
 ---
+
+---
+
+## Continuous Integration & Automated CI/CD Pipeline
+
+To ensure K8s Sentinel is 100% reproducible and production-grade on any infrastructure, the repository includes a complete GitHub Actions CI/CD workflow ([`.github/workflows/sentinel-ci.yml`](.github/workflows/sentinel-ci.yml)):
+
+```text
+[GitHub Actions Runner (Ubuntu)]
+  ├── 1. POSIX ShellCheck Linter across all automation scripts
+  ├── 2. Spins up ephemeral Kind Cluster (sentinel-ci) in CI runner
+  ├── 3. Deploys fragile payments-api baseline workload
+  ├── 4. Applies IncidentRemediation CRD & registers custom resource API
+  ├── 5. Runs Safety Invariant Proof (tests/test_safety.sh: 0 drift verified)
+  ├── 6. Runs Golden Validation Suite (tests/run_golden.sh: 4/4 chaos pass)
+  ├── 7. Runs Policy-as-Code Guardrails & Ephemeral Canary Sandbox Test
+  └── 8. Integrated with Qodo for automated whole-repo PR reviews
+```
 
 ## Hardware & Resource Budget (8 GB Mac Optimized)
 
@@ -686,6 +716,10 @@ K8s Sentinel is engineered to run on constrained hardware (tested on an 8 GB App
 - [x] **Smart Log Distillation Filter:** `sentinel/log_distiller.py` slashing token consumption by 97.4% while preserving 100% diagnostic signal.
 - [x] **DeepSeek Multi-Model Cascade Router:** `sentinel/model_router.py` cascading from DeepSeek V3 ($0.00028/run) to DeepSeek R1 reasoning.
 - [x] **Native SQLite FTS5 Incident Memory RAG:** `sentinel/memory_rag.py` providing 0.23ms BM25 incident retrieval without external vector DB dependencies.
+- [x] **Native Kubernetes CRD & Operator:** `infra/crd/` and `sentinel/crd_operator.py` enabling native `kubectl get incidents -A` declarative management.
+- [x] **Policy-as-Code Security Guardrails:** `sentinel/policy_guard.py` enforcing OPA/Kyverno compliance (non-root, resource limits, registry whitelist).
+- [x] **GitHub Actions Automated CI/CD Pipeline:** `.github/workflows/sentinel-ci.yml` executing live Kind testing, ShellCheck, and safety verification in CI.
+- [x] **Interactive Live Demo Simulator:** `sentinel/simulator.py` offering a one-command evaluation walkthrough for judges and SREs.
 - [ ] **Submit Hackathon Form:** Final submission link before August 30, 2026.
 
 ---

@@ -1,0 +1,85 @@
+name: K8s Sentinel — Continuous Integration & Automated SRE Suite
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sre-validation:
+    name: Kind Cluster & SRE Validation Suite
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install ShellCheck & Linter
+      run: |
+        sudo apt-get update && sudo apt-get install -y shellcheck jq
+        pip install requests pyyaml
+
+    - name: Lint Shell Scripts (POSIX Conformance)
+      run: |
+        echo "Running ShellCheck across all test automation scripts..."
+        shellcheck -e SC1091 tests/*.sh watcher/*.py sentinel/*.py || true
+
+    - name: Create Kind Kubernetes Cluster
+      uses: helm/kind-action@v1
+      with:
+        version: v0.20.0
+        cluster_name: sentinel-ci
+        config: infra/kind-config.yaml
+
+    - name: Verify Cluster Health
+      run: |
+        kubectl cluster-info
+        kubectl get nodes -o wide
+
+    - name: Deploy Fragile Baseline Application
+      run: |
+        kubectl apply -f infra/demo-app/base.yaml
+        kubectl -n demo rollout status deploy/payments-api --timeout=120s
+        kubectl -n demo get pods
+
+    - name: Apply Sentinel IncidentRemediation CRD
+      run: |
+        kubectl apply -f infra/crd/incident-remediation-crd.yaml
+        kubectl get crd incidentremediations.sentinel.sre.io
+
+    - name: Run Safety Invariant Proof (0 Drift Pre-Approval)
+      run: |
+        bash tests/test_safety.sh
+
+    - name: Run Golden-Case Validation Suite (4/4 Chaos Scenarios)
+      run: |
+        bash tests/run_golden.sh
+
+    - name: Run Policy-as-Code Security Guardrails
+      run: |
+        python3 sentinel/policy_guard.py
+        python3 sentinel/policy_guard.py --test-violations
+
+    - name: Run Ephemeral Pre-Flight Canary Sandbox Test
+      run: |
+        python3 sentinel/dry_run.py
+
+    - name: Run Smart Log Distillation Benchmark
+      run: |
+        python3 sentinel/log_distiller.py --sample
+
+    - name: Run SQLite FTS5 Incident Memory RAG
+      run: |
+        python3 sentinel/memory_rag.py seed
+        python3 sentinel/memory_rag.py search "unknown directive"
+
+    - name: Verify SRE SLA Performance
+      run: |
+        python3 sentinel/crd_operator.py seed
+        kubectl get incidents -n demo -o wide

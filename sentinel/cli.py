@@ -156,6 +156,9 @@ def main():
     {C_CYAN}distill{C_RESET}      Smart log distillation filter (reduces tokens by ~97%)
     {C_CYAN}router{C_RESET}       DeepSeek multi-model cascade router ($0.0012/run)
     {C_CYAN}memory{C_RESET}       Native SQLite FTS5 incident memory RAG (< 1ms BM25 recall)
+    {C_CYAN}crd{C_RESET}          Native Kubernetes CRD operator (kubectl get incidents)
+    {C_CYAN}policy{C_RESET}       Policy-as-code security guardrails audit (OPA/Kyverno)
+    {C_CYAN}simulator{C_RESET}    Interactive live demo simulator walkthrough for judges
 """)
         sys.exit(0)
         
@@ -188,6 +191,15 @@ def main():
         subprocess.run(["python3", script] + sys.argv[2:])
     elif cmd in ("memory", "rag"):
         script = os.path.join(REPO_ROOT, "sentinel/memory_rag.py")
+        subprocess.run(["python3", script] + sys.argv[2:])
+    elif cmd in ("crd", "operator"):
+        script = os.path.join(REPO_ROOT, "sentinel/crd_operator.py")
+        subprocess.run(["python3", script] + sys.argv[2:])
+    elif cmd in ("policy", "guard", "security"):
+        script = os.path.join(REPO_ROOT, "sentinel/policy_guard.py")
+        subprocess.run(["python3", script] + sys.argv[2:])
+    elif cmd in ("simulator", "demo"):
+        script = os.path.join(REPO_ROOT, "sentinel/simulator.py")
         subprocess.run(["python3", script] + sys.argv[2:])
     else:
         print(f"Unknown command '{cmd}'. Run 'python3 sentinel/cli.py help' for usage.")
