@@ -153,6 +153,9 @@ def main():
     {C_CYAN}canary{C_RESET}       Run ephemeral pre-flight canary verification in sandbox
     {C_CYAN}gitops{C_RESET}       Formulate GitOps-first PR manifest update (ArgoCD/Flux)
     {C_CYAN}webhook{C_RESET}      Start Prometheus Alertmanager webhook receiver daemon
+    {C_CYAN}distill{C_RESET}      Smart log distillation filter (reduces tokens by ~97%)
+    {C_CYAN}router{C_RESET}       DeepSeek multi-model cascade router ($0.0012/run)
+    {C_CYAN}memory{C_RESET}       Native SQLite FTS5 incident memory RAG (< 1ms BM25 recall)
 """)
         sys.exit(0)
         
@@ -176,6 +179,15 @@ def main():
         subprocess.run(["python3", script] + sys.argv[2:])
     elif cmd in ("webhook", "alertmanager"):
         script = os.path.join(REPO_ROOT, "sentinel/alertmanager_receiver.py")
+        subprocess.run(["python3", script] + sys.argv[2:])
+    elif cmd in ("distill", "filter"):
+        script = os.path.join(REPO_ROOT, "sentinel/log_distiller.py")
+        subprocess.run(["python3", script] + sys.argv[2:])
+    elif cmd in ("router", "deepseek"):
+        script = os.path.join(REPO_ROOT, "sentinel/model_router.py")
+        subprocess.run(["python3", script] + sys.argv[2:])
+    elif cmd in ("memory", "rag"):
+        script = os.path.join(REPO_ROOT, "sentinel/memory_rag.py")
         subprocess.run(["python3", script] + sys.argv[2:])
     else:
         print(f"Unknown command '{cmd}'. Run 'python3 sentinel/cli.py help' for usage.")

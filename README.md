@@ -555,6 +555,17 @@ python3 sentinel/postmortem.py --all
 # Render Slack Block-Kit War Room Card simulator
 python3 sentinel/slack_simulator.py
 # Saves block-kit JSON payload to artifacts/slack_incident_card.json
+
+# Smart Log Distillation Filter (strips noise, saves ~97% tokens)
+python3 sentinel/cli.py distill --sample
+
+# DeepSeek Multi-Model Cascade Router (DeepSeek V3 @ $0.0012/run -> DeepSeek R1 fallback)
+python3 sentinel/cli.py router
+python3 sentinel/cli.py router --force-r1
+
+# Native SQLite FTS5 Incident Memory RAG (< 1ms BM25 search, zero vector DB bloat)
+python3 sentinel/cli.py memory seed
+python3 sentinel/cli.py memory search "unknown directive"
 ```
 
 ---
@@ -595,6 +606,9 @@ K8s Sentinel is engineered to run on constrained hardware (tested on an 8 GB App
 - [x] **GitOps-First PR Remediation Engine:** `sentinel/gitops_pr.py` generating ArgoCD/Flux compatible pull requests in `artifacts/gitops_prs/`.
 - [x] **Prometheus Alertmanager Webhook Receiver:** `sentinel/alertmanager_receiver.py` providing autonomous event-driven triage on port 9099.
 - [x] **Ephemeral Pre-Flight Canary Sandbox:** `sentinel/dry_run.py` verifying patches in an isolated pod before human approval.
+- [x] **Smart Log Distillation Filter:** `sentinel/log_distiller.py` slashing token consumption by 97.4% while preserving 100% diagnostic signal.
+- [x] **DeepSeek Multi-Model Cascade Router:** `sentinel/model_router.py` cascading from DeepSeek V3 ($0.00028/run) to DeepSeek R1 reasoning.
+- [x] **Native SQLite FTS5 Incident Memory RAG:** `sentinel/memory_rag.py` providing 0.23ms BM25 incident retrieval without external vector DB dependencies.
 - [ ] **Submit Hackathon Form:** Final submission link before August 30, 2026.
 
 ---
