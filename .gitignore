@@ -37,9 +37,9 @@ docs/reference/*_files/
 # Command Code app state (recreated constantly)
 .commandcode/
 
-# Video intermediates (keep final mp4, slides, and scripts)
-demo_video/audio/*.aiff
-demo_video/clips/
-demo_video/clips_v2/
-demo_video/concat*.txt
+# Video assets & intermediates (keep local only)
+demo_video/
+*.mp4
+*.aiff
+
 
