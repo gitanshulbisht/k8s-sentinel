@@ -42,4 +42,8 @@ demo_video/
 *.mp4
 *.aiff
 
-
+# Blog & publication branding assets (external submission only)
+blog/
+*publication_thumbnail*
+*favicon*
+*publication_logo*

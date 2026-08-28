@@ -7,7 +7,7 @@
 
 [![Hackathon Track](https://img.shields.io/badge/TrueFoundry-Double--O_Track_($3,000)-blue.svg)](https://wemakedevs.org)
 [![Quality Track](https://img.shields.io/badge/Qodo-Q_Branch_Track_($2,000)-emerald.svg)](https://qodo.ai)
-[![Field Report Track](https://img.shields.io/badge/Blog-Field_Report_Track_($1,000)-purple.svg)](blog/post.md)
+[![Field Report Track](https://img.shields.io/badge/Blog-Field_Report_Track_($1,000)-purple.svg)](https://anshulbisht.hashnode.dev)
 [![Safety Suite](https://img.shields.io/badge/Safety_Proof-0_Drift_Verified-brightgreen.svg)](docs/safety-proof.md)
 [![Golden Tests](https://img.shields.io/badge/Golden_Tests-4%2F4_Passed-success.svg)](tests/run_golden.sh)
 [![Demo Video](https://img.shields.io/badge/Demo_Video-1080p_Neural_Voice-orange.svg)](#-demo-video--walkthrough)
@@ -543,11 +543,8 @@ Agent-Harness-TrueForge/
 │   └── qodo-log.md                ← Qodo review audit log & ShellCheck compliance report
 │
 ├── artifacts/                     ← Generative UI incident cockpit & preview assets
-├── watcher/                       ← Proactive 24/7 event watcher daemon
-
-│
-└── blog/                          ← Hackathon submissions
-    └── post.md                    ← Complete Field Report Track article ($1,000 Keychron)
+├── watcher/                       ← 24/7 autonomous cluster event watcher daemon
+└── .github/                       ← GitHub Actions CI/CD workflows
 ```
 
 ---
@@ -704,7 +701,7 @@ K8s Sentinel is engineered to run on constrained hardware (tested on an 8 GB App
 - [x] **Layer 2 Live Agent Execution:** Verified in TrueForge session `01m1199y92m775hj5w89sezv0a`.
 - [x] **Cross-Session SQLite Persistence:** Documented and verified in [`docs/session-persistence.md`](docs/session-persistence.md).
 - [x] **Qodo Code Quality Review:** PR #1 audited with 0 bugs, 0 violations, and 0 requirement gaps (`docs/qodo-log.md`).
-- [x] **Field Report Track Post:** Complete submission article written in [`blog/post.md`](blog/post.md).
+- [x] **Field Report Track Post:** Complete submission article prepared for Hashnode publication.
 - [x] **Demo Video Produced:** High-definition 1080p video with Microsoft Neural Voiceover, live TrueForge UI stream, Generative UI Cockpit, CRD Operator, and Policy Guardrails (9.99 mins, 17 scenes).
 - [x] **Automated MTTR Benchmark Suite:** `tests/benchmark_mttr.sh` verified live (6.14s avg MTTR, 99.77% speedup, `docs/benchmark-report.md`).
 - [x] **Automated Blameless Postmortem Engine:** `sentinel/postmortem.py` generating 4 production postmortems in `docs/incidents/`.

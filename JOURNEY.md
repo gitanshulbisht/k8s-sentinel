@@ -415,7 +415,7 @@ If any rule fails, the patch is blocked immediately with a non-compliant audit v
 - DeepSeek Multi-Model Cascade Router: $0.00028/run triage (`sentinel/model_router.py`) ✓
 - Native SQLite FTS5 RAG: 0.237ms BM25 incident retrieval (`sentinel/memory_rag.py`) ✓
 - Interactive SRE Operations CLI: unified management center (`sentinel/cli.py`) ✓
-- Qodo audit log (`docs/qodo-log.md`) & Blog submission article (`blog/post.md`) complete ✓
+- Qodo audit log (`docs/qodo-log.md`) & Field Report submission article complete ✓
 - 1080p Neural Video: 15 complete scenes with live TrueForge UI & cockpit demonstration ✓
 
 ### Status at end of Day 3
@@ -429,5 +429,5 @@ If any rule fails, the patch is blocked immediately with a non-compliant audit v
 - Live agent triage & root-cause isolation verified ✓
 - Approval-gate safety verified (Layer 2) ✓
 - Session persistence verified ✓
-- Qodo audit log (`docs/qodo-log.md`) & Blog submission draft (`blog/post.md`) published ✓
+- Qodo audit log (`docs/qodo-log.md`) & Field Report submission article draft published ✓
 
