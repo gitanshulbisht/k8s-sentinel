@@ -44,6 +44,12 @@
         </button>
       </div>
 
+      <!-- Cluster Connection Indicator -->
+      <div id="cluster-mode-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+        <span id="cluster-mode-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="cluster-mode-text">Checking Cluster...</span>
+      </div>
+
       <!-- Reset / Re-Trigger Demo Button -->
       <button id="btn-reset-demo" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 flex items-center gap-1.5 transition" title="Toggle between Active Incident and Remediated State">
         <i class="fa-solid fa-rotate-right text-cyan-400"></i> <span>Reset / Re-Trigger Outage</span>
@@ -349,21 +355,105 @@
     const replicaCount = document.getElementById('replica-count');
     const incidentStatus = document.getElementById('incident-status-pill');
     const gateTag = document.getElementById('gate-tag');
+    const modeBadge = document.getElementById('cluster-mode-badge');
+    const modeDot = document.getElementById('cluster-mode-dot');
+    const modeText = document.getElementById('cluster-mode-text');
 
-    function renderState(isResolved) {
+    let isLiveCluster = false;
+    let pollInterval = null;
+
+    // --- 1. Live Cluster API Sync ---
+    async function checkClusterConnection() {
+      try {
+        const res = await fetch('/api/cluster-status');
+        if (!res.ok) throw new Error("API offline");
+        const data = await res.json();
+        
+        if (data.live) {
+          isLiveCluster = true;
+          modeBadge.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+          modeDot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+          modeText.innerText = 'Live K8s Cluster Connected';
+
+          applyLiveClusterState(data);
+          if (!pollInterval) {
+            pollInterval = setInterval(pollLiveCluster, 3000);
+          }
+          return;
+        }
+      } catch (e) {
+        // Fallback to standalone mode
+      }
+      
+      // Standalone simulation mode
+      setStandaloneMode();
+    }
+
+    async function pollLiveCluster() {
+      if (!isLiveCluster) return;
+      try {
+        const res = await fetch('/api/cluster-status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.live) {
+            applyLiveClusterState(data);
+          }
+        }
+      } catch (e) {
+        setStandaloneMode();
+      }
+    }
+
+    function setStandaloneMode() {
+      isLiveCluster = false;
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+      modeBadge.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
+      modeDot.className = 'w-2 h-2 rounded-full bg-cyan-400';
+      modeText.innerText = 'Interactive Demo Mode';
+
+      const savedState = localStorage.getItem('k8s_sentinel_status');
+      renderState(savedState === 'resolved');
+    }
+
+    function applyLiveClusterState(data) {
+      const ready = data.replicas_ready || 0;
+      const total = data.replicas_total || 3;
+      const hasCrash = data.has_crash;
+
+      if (!hasCrash && ready >= total && total > 0) {
+        // Cluster is healthy!
+        renderState(true, true);
+        replicaCount.className = 'text-emerald-400 font-mono font-bold';
+        replicaCount.innerText = `${ready}/${total} Ready (Live Cluster Healthy)`;
+      } else {
+        // Cluster has active outage!
+        renderState(false, true);
+        replicaCount.className = 'text-red-400 font-mono font-bold';
+        replicaCount.innerText = `${ready}/${total} Available (Live Outage Detected)`;
+      }
+
+      // Update pod badges if provided
+      if (data.pods && data.pods.length > 0) {
+        const p1 = data.pods[0];
+        podBadge1.innerText = `${p1.ready} ${p1.status}`;
+        podBadge1.className = p1.is_ready 
+          ? 'text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.5 rounded'
+          : 'text-[10px] bg-red-500/20 text-red-300 font-bold px-1.5 py-0.5 rounded';
+        podRestarts1.innerText = `${p1.restarts} restarts`;
+      }
+    }
+
+    // --- 2. State Renderer (Works in both live & demo modes) ---
+    function renderState(isResolved, isLiveSync = false) {
       if (isResolved) {
-        localStorage.setItem('k8s_sentinel_status', 'resolved');
+        if (!isLiveSync) localStorage.setItem('k8s_sentinel_status', 'resolved');
         btnApprove.disabled = true;
         btnApprove.classList.add('opacity-50', 'cursor-not-allowed');
-        btnApprove.innerHTML = '<i class="fa-solid fa-circle-check"></i> Remediation Executed';
-        logBox.classList.remove('hidden');
-        logBox.innerHTML = `
-          <div class="text-cyan-300">✓ ConfigMap patched</div>
-          <div class="text-cyan-300">✓ Deployment rollout verified (3/3 Ready)</div>
-          <div class="text-emerald-400 font-bold">✓ GET /healthz &rarr; HTTP 200 OK</div>
-          <div class="text-emerald-300 font-bold mt-2">🎉 RECOVERY COMPLETE: INCIDENT CLOSED (Persisted)</div>
-        `;
-
+        btnApprove.innerHTML = '<i class="fa-solid fa-circle-check"></i> Remediation Applied';
+        
         podBadge1.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.5 rounded';
         podBadge1.innerText = '1/1 Running';
         podRestarts1.className = 'text-emerald-400 font-bold';
@@ -378,7 +468,7 @@
         gateTag.className = 'text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded';
         gateTag.innerText = 'Remediation Applied';
       } else {
-        localStorage.setItem('k8s_sentinel_status', 'active');
+        if (!isLiveSync) localStorage.setItem('k8s_sentinel_status', 'active');
         btnApprove.disabled = false;
         btnApprove.classList.remove('opacity-50', 'cursor-not-allowed');
         btnApprove.innerHTML = '<i class="fa-solid fa-circle-check"></i> Approve &amp; Execute Remediation';
@@ -401,17 +491,35 @@
       }
     }
 
-    // Initialize state from localStorage
-    const savedState = localStorage.getItem('k8s_sentinel_status');
-    if (savedState === 'resolved') {
-      renderState(true);
-    }
-
-    btnApprove.addEventListener('click', () => {
+    // --- 3. Click Handlers ---
+    btnApprove.addEventListener('click', async () => {
       btnApprove.disabled = true;
       btnApprove.classList.add('opacity-50', 'cursor-not-allowed');
       logBox.classList.remove('hidden');
 
+      if (isLiveCluster) {
+        logBox.innerHTML = `
+          <div class="text-cyan-300">==> Sending mutating command to live Kubernetes cluster...</div>
+          <div class="text-amber-300"><i class="fa-solid fa-spinner fa-spin"></i> Executing kubectl patch configmap nginx-healthz...</div>
+        `;
+        try {
+          const res = await fetch('/api/remediate', { method: 'POST' });
+          const json = await res.json();
+          if (json.success) {
+            logBox.innerHTML = `
+              <div class="text-cyan-300">✓ kubectl patch configmap nginx-healthz applied</div>
+              <div class="text-cyan-300">✓ kubectl rollout restart deploy/payments-api initiated</div>
+              <div class="text-emerald-400 font-bold mt-2">🎉 LIVE REMEDIATION COMPLETE! Pods rolling out.</div>
+            `;
+            setTimeout(pollLiveCluster, 1500);
+            return;
+          }
+        } catch (e) {
+          logBox.innerHTML += `<div class="text-red-400">Error communicating with live cluster: ${e.message}</div>`;
+        }
+      }
+
+      // Standalone simulation fallback
       setTimeout(() => {
         logBox.innerHTML = `
           <div class="text-cyan-300">✓ kubectl patch configmap nginx-healthz succeeded</div>
@@ -421,12 +529,27 @@
       }, 1200);
 
       setTimeout(() => {
+        logBox.innerHTML = `
+          <div class="text-cyan-300">✓ ConfigMap patched</div>
+          <div class="text-cyan-300">✓ Deployment rollout verified (3/3 Ready)</div>
+          <div class="text-emerald-400 font-bold">✓ GET /healthz &rarr; HTTP 200 OK</div>
+          <div class="text-emerald-300 font-bold mt-2">🎉 RECOVERY COMPLETE: INCIDENT CLOSED</div>
+        `;
         renderState(true);
       }, 2800);
     });
 
-    btnResetDemo.addEventListener('click', () => {
-      renderState(false);
+    btnResetDemo.addEventListener('click', async () => {
+      if (isLiveCluster) {
+        logBox.classList.remove('hidden');
+        logBox.innerHTML = `<div class="text-amber-300"><i class="fa-solid fa-spinner fa-spin"></i> Injecting CrashLoopBackOff chaos into live cluster...</div>`;
+        try {
+          await fetch('/api/chaos', { method: 'POST' });
+          setTimeout(pollLiveCluster, 2000);
+        } catch (e) {}
+      } else {
+        renderState(false);
+      }
     });
 
     // Mode Toggle
@@ -446,6 +569,9 @@
       gateTag.innerText = 'mutating: true (Approval Required)';
       gateTag.className = 'text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded';
     });
+
+    // Initialize on load
+    checkClusterConnection();
   </script>
 </body>
 </html>

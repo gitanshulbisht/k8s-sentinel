@@ -154,8 +154,9 @@ def cmd_cockpit(port=8085):
         pass
 
     if not is_running:
+        server_script = os.path.join(REPO_ROOT, "sentinel/cockpit_server.py")
         subprocess.Popen(
-            [sys.executable, "-m", "http.server", str(port), "--directory", cockpit_dir],
+            [sys.executable, server_script, "--port", str(port)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
