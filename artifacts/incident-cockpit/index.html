@@ -44,6 +44,11 @@
         </button>
       </div>
 
+      <!-- Reset / Re-Trigger Demo Button -->
+      <button id="btn-reset-demo" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 flex items-center gap-1.5 transition" title="Toggle between Active Incident and Remediated State">
+        <i class="fa-solid fa-rotate-right text-cyan-400"></i> <span>Reset / Re-Trigger Outage</span>
+      </button>
+
       <a href="https://github.com/gitanshulbisht/k8s-sentinel" target="_blank" class="text-slate-400 hover:text-white text-sm px-2 py-1 rounded transition">
         <i class="fa-brands fa-github text-lg"></i>
       </a>
@@ -337,6 +342,7 @@
 
   <script>
     const btnApprove = document.getElementById('btn-approve');
+    const btnResetDemo = document.getElementById('btn-reset-demo');
     const logBox = document.getElementById('remediation-log');
     const podBadge1 = document.getElementById('pod-badge-1');
     const podRestarts1 = document.getElementById('pod-restarts-1');
@@ -344,26 +350,18 @@
     const incidentStatus = document.getElementById('incident-status-pill');
     const gateTag = document.getElementById('gate-tag');
 
-    btnApprove.addEventListener('click', () => {
-      btnApprove.disabled = true;
-      btnApprove.classList.add('opacity-50', 'cursor-not-allowed');
-      logBox.classList.remove('hidden');
-
-      setTimeout(() => {
-        logBox.innerHTML = `
-          <div class="text-cyan-300">✓ kubectl patch configmap nginx-healthz succeeded</div>
-          <div class="text-cyan-300">✓ deployment.apps/payments-api restarted</div>
-          <div class="text-amber-300"><i class="fa-solid fa-spinner fa-spin"></i> Waiting for new pod readiness probe...</div>
-        `;
-      }, 1200);
-
-      setTimeout(() => {
-        // Rollout complete
+    function renderState(isResolved) {
+      if (isResolved) {
+        localStorage.setItem('k8s_sentinel_status', 'resolved');
+        btnApprove.disabled = true;
+        btnApprove.classList.add('opacity-50', 'cursor-not-allowed');
+        btnApprove.innerHTML = '<i class="fa-solid fa-circle-check"></i> Remediation Executed';
+        logBox.classList.remove('hidden');
         logBox.innerHTML = `
           <div class="text-cyan-300">✓ ConfigMap patched</div>
           <div class="text-cyan-300">✓ Deployment rollout verified (3/3 Ready)</div>
           <div class="text-emerald-400 font-bold">✓ GET /healthz &rarr; HTTP 200 OK</div>
-          <div class="text-emerald-300 font-bold mt-2">🎉 RECOVERY COMPLETE: INCIDENT CLOSED</div>
+          <div class="text-emerald-300 font-bold mt-2">🎉 RECOVERY COMPLETE: INCIDENT CLOSED (Persisted)</div>
         `;
 
         podBadge1.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.5 rounded';
@@ -379,7 +377,56 @@
 
         gateTag.className = 'text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded';
         gateTag.innerText = 'Remediation Applied';
+      } else {
+        localStorage.setItem('k8s_sentinel_status', 'active');
+        btnApprove.disabled = false;
+        btnApprove.classList.remove('opacity-50', 'cursor-not-allowed');
+        btnApprove.innerHTML = '<i class="fa-solid fa-circle-check"></i> Approve &amp; Execute Remediation';
+        logBox.classList.add('hidden');
+        logBox.innerHTML = '';
+
+        podBadge1.className = 'text-[10px] bg-red-500/20 text-red-300 font-bold px-1.5 py-0.5 rounded';
+        podBadge1.innerText = '0/1 CrashLoop';
+        podRestarts1.className = 'text-red-400 font-bold';
+        podRestarts1.innerText = '14 restarts';
+        
+        replicaCount.className = 'text-red-400 font-mono font-bold';
+        replicaCount.innerText = '2/3 Available (1 CrashLoopBackOff)';
+
+        incidentStatus.className = 'bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-bold px-2 py-0.5 rounded uppercase';
+        incidentStatus.innerText = 'Awaiting Approval';
+
+        gateTag.className = 'text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded';
+        gateTag.innerText = 'mutating: true (Approval Required)';
+      }
+    }
+
+    // Initialize state from localStorage
+    const savedState = localStorage.getItem('k8s_sentinel_status');
+    if (savedState === 'resolved') {
+      renderState(true);
+    }
+
+    btnApprove.addEventListener('click', () => {
+      btnApprove.disabled = true;
+      btnApprove.classList.add('opacity-50', 'cursor-not-allowed');
+      logBox.classList.remove('hidden');
+
+      setTimeout(() => {
+        logBox.innerHTML = `
+          <div class="text-cyan-300">✓ kubectl patch configmap nginx-healthz succeeded</div>
+          <div class="text-cyan-300">✓ deployment.apps/payments-api restarted</div>
+          <div class="text-amber-300"><i class="fa-solid fa-spinner fa-spin"></i> Waiting for new pod readiness probe...</div>
+        `;
+      }, 1200);
+
+      setTimeout(() => {
+        renderState(true);
       }, 2800);
+    });
+
+    btnResetDemo.addEventListener('click', () => {
+      renderState(false);
     });
 
     // Mode Toggle
