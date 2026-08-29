@@ -48,19 +48,31 @@ def cmd_status(ns="demo"):
     banner()
     print(f" {C_BOLD}Cluster Health Overview [Namespace: {ns}]{C_RESET}\n")
     try:
-        pods = subprocess.check_output(f"kubectl -n {ns} get pods -o json", shell=True, text=True)
-        data = json.loads(pods)
+        cmd = f"kubectl -n {ns} get pods -o json"
+        res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        if res.returncode != 0:
+            print(f" {C_YELLOW}⚠ Cluster connection warning: {res.stderr.strip()}{C_RESET}")
+            print(f"   If your cluster is still booting, wait a few moments and retry.\n")
+            return
+
+        data = json.loads(res.stdout)
         items = data.get("items", [])
+
+        if not items:
+            print(f" {C_YELLOW}No pods found in namespace '{ns}'.{C_RESET}")
+            print(f" Baseline workload may still be deploying. Check with: kubectl get pods -n {ns}\n")
+            return
         
         print(f" {'Pod Name':<42} | {'Ready':<7} | {'Status':<18} | {'Restarts':<8}")
         print(" " + "-"*82)
         
         unhealthy = False
         for p in items:
-            name = p["metadata"]["name"]
-            cs = p.get("status", {}).get("containerStatuses", [{}])[0]
+            name = p.get("metadata", {}).get("name", "unknown")
+            cs_list = p.get("status", {}).get("containerStatuses") or []
+            cs = cs_list[0] if cs_list else {}
             ready = f"{1 if cs.get('ready') else 0}/1"
-            status = p["status"]["phase"]
+            status = p.get("status", {}).get("phase", "Unknown")
             
             # Check for crashloop or error
             waiting = cs.get("state", {}).get("waiting", {})
@@ -80,9 +92,9 @@ def cmd_status(ns="demo"):
             print(f"\n {C_RED}🚨 OUTAGE DETECTED: One or more pods are unhealthy in namespace '{ns}'.{C_RESET}")
             print(f"    Run: {C_YELLOW}python3 sentinel/cli.py triage {ns}{C_RESET} to initiate autonomous triage.\n")
         else:
-            print(f"\n {C_GREEN}✓ All pods healthy (3/3 Ready). Cluster is operating normally.{C_RESET}\n")
+            print(f"\n {C_GREEN}✓ All pods healthy ({len(items)}/{len(items)} Ready). Cluster is operating normally.{C_RESET}\n")
     except Exception as e:
-        print(f"Error querying cluster: {e}")
+        print(f" {C_YELLOW}Error querying cluster: {e}{C_RESET}\n")
 
 def cmd_triage(ns="demo"):
     banner()
@@ -124,11 +136,39 @@ def cmd_triage(ns="demo"):
     else:
         print(f"\n  {C_YELLOW}⚠ Remediation rejected by operator. Cluster state preserved completely unchanged.{C_RESET}\n")
 
-def cmd_cockpit():
-    path = os.path.join(REPO_ROOT, "artifacts/incident-cockpit/index.html")
-    print(f"\n  {C_CYAN}Opening Generative UI Incident Cockpit in browser:{C_RESET}")
-    print(f"  file://{path}\n")
-    webbrowser.open(f"file://{path}")
+def cmd_cockpit(port=8085):
+    banner()
+    cockpit_dir = os.path.join(REPO_ROOT, "artifacts/incident-cockpit")
+    if not os.path.exists(cockpit_dir):
+        print(f" {C_RED}Cockpit directory not found at {cockpit_dir}{C_RESET}")
+        return
+
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    is_running = False
+    try:
+        s.connect(("127.0.0.1", port))
+        is_running = True
+        s.close()
+    except Exception:
+        pass
+
+    if not is_running:
+        subprocess.Popen(
+            [sys.executable, "-m", "http.server", str(port), "--directory", cockpit_dir],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        time.sleep(1)
+
+    url = f"http://localhost:{port}"
+    print(f"\n {C_GREEN}✓ Generative UI Incident Cockpit is LIVE!{C_RESET}\n")
+    print(f"  {C_BOLD}Access URL:{C_RESET} {C_CYAN}{url}{C_RESET}")
+    print(f"  {C_DIM}In GitHub Codespaces: Port {port} is forwarded; open from the Ports tab or click the link above.{C_RESET}\n")
+    try:
+        webbrowser.open(url)
+    except Exception:
+        pass
 
 def cmd_benchmark():
     script = os.path.join(REPO_ROOT, "tests/benchmark_mttr.sh")

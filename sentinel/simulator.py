@@ -21,6 +21,7 @@ C_BLUE   = "\033[1;34m"
 C_PURPLE = "\033[1;35m"
 C_CYAN   = "\033[1;36m"
 C_WHITE  = "\033[1;37m"
+C_DIM    = "\033[2m"
 
 def clear():
     print("\033c", end="")

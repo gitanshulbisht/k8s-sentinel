@@ -12,11 +12,15 @@
       "version": "20"
     }
   },
-  "forwardPorts": [8790, 9236, 9099, 80],
+  "forwardPorts": [8790, 9236, 9099, 8085, 80],
   "portsAttributes": {
     "8790": {
       "label": "TrueForge Web UI",
       "onAutoForward": "notify"
+    },
+    "8085": {
+      "label": "Incident Cockpit UI",
+      "onAutoForward": "openBrowser"
     },
     "9236": {
       "label": "Kubernetes MCP Server",
