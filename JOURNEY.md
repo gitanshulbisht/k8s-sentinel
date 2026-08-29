@@ -397,6 +397,14 @@ If any rule fails, the patch is blocked immediately with a non-compliant audit v
 
 **Solution:** We built `sentinel/simulator.py` (`python3 sentinel/cli.py simulator`). It provides an interactive terminal dashboard allowing any judge to test all 12 platform capabilities—from live crashloop triage and CRD inspection to pre-flight canary sandboxes and MTTR benchmarks—with a single keystroke.
 
+---
+
+### Entry 5.12 — Zero-Setup Cloud Evaluation: 1-Click GitHub Codespaces Devcontainer
+
+**Problem:** Complex Kubernetes agent architectures are notoriously difficult for evaluators to test because they require a host Docker runtime, a running Kubernetes cluster, a Go MCP server, a Node.js TrueForge instance, and Python tools. Asking judges to set this up locally risks environment conflicts or abandonment.
+
+**Solution:** We authored `.devcontainer/devcontainer.json` and `.devcontainer/setup.sh`. Utilizing GitHub's Docker-in-Docker feature, any judge can launch a full Ubuntu cloud VM directly in their browser for 100% free. The bootstrap script automatically starts a real Kind cluster (`sentinel-demo`), deploys `payments-api`, installs the `IncidentRemediation` CRD, pre-warms SQLite memory, launches the `kubernetes-mcp-server`, and automatically forwards all ports with public HTTPS URLs. Evaluators can run `python3 sentinel/cli.py simulator` inside their browser terminal immediately with zero local installation.
+
 ### Status at Final Hackathon Milestone
 
 - Kind cluster `sentinel-demo` up and healthy ✓
@@ -416,7 +424,8 @@ If any rule fails, the patch is blocked immediately with a non-compliant audit v
 - Native SQLite FTS5 RAG: 0.237ms BM25 incident retrieval (`sentinel/memory_rag.py`) ✓
 - Interactive SRE Operations CLI: unified management center (`sentinel/cli.py`) ✓
 - Qodo audit log (`docs/qodo-log.md`) & Field Report submission article complete ✓
-- 1080p Neural Video: 15 complete scenes with live TrueForge UI & cockpit demonstration ✓
+- 1080p Neural Video: 17 complete scenes with live TrueForge UI, cockpit demonstration, CRD & CI/CD (9.99 mins) ✓
+- 1-Click Cloud Deployment: GitHub Codespaces devcontainer with real Kind cluster in browser ✓
 
 ### Status at end of Day 3
 

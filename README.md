@@ -46,26 +46,29 @@ A high-definition 1080p demo video with studio-grade **Microsoft Neural Voice Na
 
 ## Table of Contents
 
-1. [The Problem: Why Raw LLMs Fail in SRE](#the-problem-why-raw-llms-fail-in-sre)
-2. [What K8s Sentinel Does](#what-k8s-sentinel-does)
-3. [System Architecture](#system-architecture)
-4. [Autonomous Operation Spectrum: Guarded vs. Self-Healing](#autonomous-operation-spectrum-guarded-vs-self-healing)
-5. [Why TrueForge Is Load-Bearing Across the Stack](#why-trueforge-is-load-bearing-across-the-stack)
-6. [The 5-Phase Incident Triage Playbook](#the-5-phase-incident-triage-playbook)
-7. [Chaos Engineering Harness & Golden Signatures](#chaos-engineering-harness--golden-signatures)
-8. [The Findings Contract (Structured Output Spec)](#the-findings-contract-structured-output-spec)
-9. [Generative UI: The Interactive Incident Cockpit](#generative-ui-the-interactive-incident-cockpit)
-10. [Proactive 24/7 Watcher: Autonomous Event-Driven SRE](#proactive-247-watcher-autonomous-event-driven-sre)
-11. [Enterprise Production SRE Suite](#enterprise-production-sre-suite)
-12. [System, Cost & Token Optimizations](#system-cost--token-optimizations)
-13. [Empirical MTTR Benchmark & SLA Scorecard](#empirical-mttr-benchmark--sla-scorecard)
-14. [Defense-in-Depth Safety Architecture](#defense-in-depth-safety-architecture)
-15. [Cross-Session Persistence Engine (SQLite)](#cross-session-persistence-engine-sqlite)
-16. [Code Quality Process & Qodo Review Audit](#code-quality-process--qodo-review-audit)
-17. [Repository Structure](#repository-structure)
-18. [Quickstart & Reproduction Guide](#quickstart--reproduction-guide)
-19. [Hardware & Resource Budget (8 GB Mac Optimized)](#hardware--resource-budget-8-gb-mac-optimized)
-20. [Hackathon Submission Roadmap](#hackathon-submission-roadmap)
+1. [1-Click Cloud Deployment (GitHub Codespaces — 100% Free)](#-1-click-cloud-deployment-github-codespaces--100-free)
+2. [The Problem: Why Raw LLMs Fail in SRE](#the-problem-why-raw-llms-fail-in-sre)
+3. [What K8s Sentinel Does](#what-k8s-sentinel-does)
+4. [System Architecture & 5-Stage Topology](#system-architecture)
+5. [Autonomous Operation Spectrum: Guarded vs. Self-Healing](#autonomous-operation-spectrum-guarded-vs-self-healing)
+6. [Why TrueForge Is Load-Bearing Across the Stack](#why-trueforge-is-load-bearing-across-the-stack)
+7. [The 5-Phase Incident Triage Playbook](#the-5-phase-incident-triage-playbook)
+8. [Chaos Engineering Harness & Golden Signatures](#chaos-engineering-harness--golden-signatures)
+9. [The Findings Contract (Structured Output Spec)](#the-findings-contract-structured-output-spec)
+10. [Generative UI: The Interactive Incident Cockpit](#generative-ui-the-interactive-incident-cockpit)
+11. [Proactive 24/7 Watcher: Autonomous Event-Driven SRE](#proactive-247-watcher-autonomous-event-driven-sre)
+12. [Enterprise Production SRE Suite](#enterprise-production-sre-suite)
+13. [System, Cost & Token Optimizations](#system-cost--token-optimizations)
+14. [Empirical MTTR Benchmark & SLA Scorecard](#empirical-mttr-benchmark--sla-scorecard)
+15. [Enterprise Governance: Native Kubernetes CRD & Policy Guardrails](#enterprise-governance-native-kubernetes-crd--policy-guardrails)
+16. [Defense-in-Depth Safety Architecture](#defense-in-depth-safety-architecture)
+17. [Cross-Session Persistence Engine (SQLite)](#cross-session-persistence-engine-sqlite)
+18. [Code Quality Process & Qodo Review Audit](#code-quality-process--qodo-review-audit)
+19. [Repository Structure](#repository-structure)
+20. [Quickstart & Reproduction Guide (Local & Codespaces)](#quickstart--reproduction-guide)
+21. [Continuous Integration & Automated CI/CD Pipeline](#continuous-integration--automated-cicd-pipeline)
+22. [Hardware & Resource Budget (8 GB Mac & Cloud Optimized)](#hardware--resource-budget-8-gb-mac-optimized)
+23. [Hackathon Submission Roadmap](#hackathon-submission-roadmap)
 
 ---
 
@@ -470,6 +473,44 @@ Averages / Total | 4/4 Verified (100%)      |   2.14s |   4.00s |   6.14s |    4
 * **Sub-Cent Cost:** Total inference cost across all 4 severe outages was **$0.0070 (< 1 Cent!)**.
 * **Automated Blameless Postmortems:** Once resolved, Sentinel automatically compiles Google SRE standard postmortems with 5 Whys and prioritized action items in `docs/incidents/` (`python3 sentinel/cli.py postmortem`).
 * **Full Benchmark Report:** Documented in [`docs/benchmark-report.md`](docs/benchmark-report.md).
+
+---
+
+## Enterprise Governance: Native Kubernetes CRD & Policy Guardrails
+
+To graduate K8s Sentinel from an external script into a first-class citizen of the cloud-native ecosystem, we built four enterprise-grade governance mechanisms:
+
+### 1. Native Kubernetes Custom Resource Definition (`IncidentRemediation`)
+Platform engineers expect infrastructure state to be managed declaratively through `kubectl`. Sentinel registers the `IncidentRemediation` custom resource (`sentinel.sre.io/v1alpha1`) directly with the Kubernetes API server:
+* **Custom Resource Definition:** Defined in [`infra/crd/incident-remediation-crd.yaml`](infra/crd/incident-remediation-crd.yaml).
+* **Native Status Inspection:**
+  ```bash
+  kubectl get incidents -n demo -o wide
+  # Output:
+  # NAME                          SEVERITY  WORKLOAD              ROOT CAUSE      APPROVAL         PHASE
+  # inc-20260827-crashloop-demo SEV-2     deploy/payments-api   CONFIG_INVALID  PendingApproval  Triaged
+  ```
+* **Declarative Approval:** Operators can approve remediation directly via `kubectl`:
+  ```bash
+  kubectl patch incident inc-20260827-crashloop-demo -n demo --type merge -p '{"spec":{"approvalStatus":"Approved"}}'
+  ```
+  Sentinel's operator controller (`sentinel/crd_operator.py`) detects the approval, executes the patch, triggers the rollout restart, and sets `status.phase: Remediated`.
+
+### 2. Policy-as-Code Security Guardrails (`sentinel/policy_guard.py`)
+In enterprise production, SecOps teams demand cryptographic guarantees that an AI model cannot accidentally suggest dangerous patches. Before any remediation reaches the human approval gate, our policy engine audits the proposed fix against 5 zero-trust security invariants:
+* **`SEC-01` (Non-Root Invariant):** Rejects any container running as root (`runAsUser: 0`).
+* **`SEC-02` (No Privilege Escalation):** Blocks `privileged: true` and host namespaces (`hostNetwork`, `hostPID`).
+* **`SEC-03` (Dangerous Mounts):** Rejects host socket mounts to `/root` or `/var/run/docker.sock`.
+* **`SEC-04` (Resource Bounds):** Enforces safe memory bounds (`<= 1Gi`).
+* **`SEC-05` (Image Whitelist):** Rejects unverified or malicious container registries.
+* **CLI:** `python3 sentinel/cli.py policy` (audit live) or `python3 sentinel/cli.py policy --test-violations` (demonstrate blocking hallucinated unsafe patches).
+
+### 3. Interactive Live Demo Simulator (`sentinel/simulator.py`)
+For evaluators and platform engineers, Sentinel provides a unified interactive terminal operations center:
+```bash
+python3 sentinel/cli.py simulator
+```
+Provides an immediate menu to test all 12 platform capabilities—from live crashloop triage and CRD inspection to pre-flight canary sandboxes and MTTR benchmarks—with a single keystroke.
 
 ## Defense-in-Depth Safety Architecture
 
