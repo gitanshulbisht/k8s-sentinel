@@ -48,10 +48,10 @@ Want to test K8s Sentinel on a **real Kubernetes cluster in your browser** with 
 
 ## 📺 Demo Video & Walkthrough
 
-A high-definition 1080p demo video with studio-grade **Microsoft Neural Voice Narration** (`en-US-ChristopherNeural`) and real-time TrueForge application walkthrough has been produced for the hackathon:
+A high-definition 1080p demo video with real-time TrueForge application walkthrough has been produced for the hackathon:
 
-* **Duration:** 9.99 minutes (599.10 seconds)
-* **Specs:** 1080p Full HD (1920x1080), 25 fps, AAC Stereo 44.1 kHz, 18.20 MB
+* **Duration:** 9.59 minutes
+* **Specs:** 1080p Full HD (1920x1080)
 * **17 Comprehensive Scenes:** Covers the 3 AM on-call problem, TrueForge harness architecture, 4-scenario chaos harness, live TrueForge web UI stream (`localhost:8790`), dynamic subagent spawning, quarantined Daytona sandbox execution, human approval gate, workload rollout recovery, cross-session SQLite memory, the **Generative UI Incident Cockpit**, the **Proactive 24/7 Watcher Daemon**, **Autonomy & Cost Economics**, **Enterprise SRE Suite (GitOps, Alertmanager, Ephemeral Canary)**, **System Optimizations (Log Distillation, DeepSeek Cascade Routing, SQLite FTS5 RAG)**, **Empirical MTTR Benchmark & SLA Scorecard**, **Native Kubernetes CRD & Policy-as-Code Guardrails**, and **Interactive Live Demo Simulator & GitHub Actions CI/CD**.
 
 ---
@@ -776,38 +776,6 @@ K8s Sentinel is engineered to run on constrained hardware (tested on an 8 GB App
 | **TrueForge Harness** | ~110 MB RAM | Single Node.js runtime backed by local embedded SQLite. |
 | **Kubernetes MCP Server** | ~35 MB RAM | Minimal Go binary serving streaming SSE requests. |
 | **Total System Utilization** | **~2.2 GB / 8 GB** | Leaves ample headroom for OS and browser without swapping. |
-
----
-
-## Hackathon Submission Roadmap
-
-- [x] **Cluster Infrastructure:** Single-node Kind cluster running fragile `payments-api` (`infra/kind-config.yaml`, `infra/demo-app/base.yaml`).
-- [x] **Kubernetes MCP Connector:** Streamable HTTP server on port 9236 with `--disable-destructive` active.
-- [x] **In-Cluster Metrics Pipeline:** `metrics-server` installed and correlated.
-- [x] **Chaos Engineering Harness:** 4 distinct scenarios with automated triggers and reverts (`crashloop`, `oomkill`, `probe-fail`, `imagepull`).
-- [x] **Triage Playbook:** 5-phase SRE skill imported into TrueForge (`skills/incident-triage/SKILL.md`).
-- [x] **Golden Validation Suite:** `tests/run_golden.sh` passing **4/4** live in cluster.
-- [x] **Safety Invariant Proof:** `tests/test_safety.sh` passing with **0 state drift** pre-approval (`docs/safety-proof.md`).
-- [x] **Layer 2 Live Agent Execution:** Verified in TrueForge session `01m1199y92m775hj5w89sezv0a`.
-- [x] **Cross-Session SQLite Persistence:** Documented and verified in [`docs/session-persistence.md`](docs/session-persistence.md).
-- [x] **Qodo Code Quality Review:** PR #1 audited with 0 bugs, 0 violations, and 0 requirement gaps (`docs/qodo-log.md`).
-- [x] **Field Report Track Post:** Complete submission article prepared for Hashnode publication.
-- [x] **Demo Video Produced:** High-definition 1080p video with Microsoft Neural Voiceover, live TrueForge UI stream, Generative UI Cockpit, CRD Operator, and Policy Guardrails (9.99 mins, 17 scenes).
-- [x] **Automated MTTR Benchmark Suite:** `tests/benchmark_mttr.sh` verified live (6.14s avg MTTR, 99.77% speedup, `docs/benchmark-report.md`).
-- [x] **Automated Blameless Postmortem Engine:** `sentinel/postmortem.py` generating 4 production postmortems in `docs/incidents/`.
-- [x] **Interactive SRE Terminal CLI & TUI:** `sentinel/cli.py` supporting status, interactive triage, and cockpit launch.
-- [x] **Slack Block-Kit War Room Simulator:** `sentinel/slack_simulator.py` generating interactive Slack incident approval cards.
-- [x] **GitOps-First PR Remediation Engine:** `sentinel/gitops_pr.py` generating ArgoCD/Flux compatible pull requests in `artifacts/gitops_prs/`.
-- [x] **Prometheus Alertmanager Webhook Receiver:** `sentinel/alertmanager_receiver.py` providing autonomous event-driven triage on port 9099.
-- [x] **Ephemeral Pre-Flight Canary Sandbox:** `sentinel/dry_run.py` verifying patches in an isolated pod before human approval.
-- [x] **Smart Log Distillation Filter:** `sentinel/log_distiller.py` slashing token consumption by 97.4% while preserving 100% diagnostic signal.
-- [x] **DeepSeek Multi-Model Cascade Router:** `sentinel/model_router.py` cascading from DeepSeek V3 ($0.00028/run) to DeepSeek R1 reasoning.
-- [x] **Native SQLite FTS5 Incident Memory RAG:** `sentinel/memory_rag.py` providing 0.23ms BM25 incident retrieval without external vector DB dependencies.
-- [x] **Native Kubernetes CRD & Operator:** `infra/crd/` and `sentinel/crd_operator.py` enabling native `kubectl get incidents -A` declarative management.
-- [x] **Policy-as-Code Security Guardrails:** `sentinel/policy_guard.py` enforcing OPA/Kyverno compliance (non-root, resource limits, registry whitelist).
-- [x] **GitHub Actions Automated CI/CD Pipeline:** `.github/workflows/sentinel-ci.yml` executing live Kind testing, ShellCheck, and safety verification in CI.
-- [x] **Interactive Live Demo Simulator:** `sentinel/simulator.py` offering a one-command evaluation walkthrough for judges and SREs.
-- [ ] **Submit Hackathon Form:** Final submission link before August 30, 2026.
 
 ---
 
