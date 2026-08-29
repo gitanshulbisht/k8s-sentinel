@@ -53,13 +53,18 @@ if ! pgrep -f "kubernetes-mcp-server" > /dev/null; then
     nohup kubernetes-mcp-server --port 9236 --bind-address 0.0.0.0 --kubeconfig ~/.kube/config --disable-destructive > /tmp/mcp-server.log 2>&1 &
 fi
 
+# 8. Start TrueForge Agent Harness
+echo "• Starting TrueForge Agent Harness on port 8790..."
+nohup npx --yes @truefoundry/trueforge --port 8790 > /tmp/trueforge.log 2>&1 &
+
 echo ""
 echo "=================================================================="
-echo "✅ K8S SENTINEL REAL CLUSTER IS LIVE & READY!"
+echo "✅ K8S SENTINEL REAL CLUSTER & TRUEFORGE ARE LIVE!"
 echo "=================================================================="
 echo "  • Cluster:       Kind (sentinel-demo) - Kubernetes v1.32"
 echo "  • Workload:      demo/payments-api (3/3 replicas running)"
 echo "  • MCP Server:    Listening on http://localhost:9236/mcp"
+echo "  • TrueForge UI:  Listening on http://localhost:8790"
 echo "  • Quickstart:    Run: python3 sentinel/cli.py simulator"
 echo "=================================================================="
 echo ""
