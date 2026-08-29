@@ -32,6 +32,13 @@ print(json.dumps({'image':cs['image'],'resources':cs.get('resources'),'livenessP
 }
 
 log "Check 1: MCP tool surface contains no destructive verbs"
+for i in {1..15}; do
+  if curl -s -X POST "$MCP_URL" -H "Content-Type: application/json" -d '{}' >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
 SID=$(curl -si -X POST "$MCP_URL" -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"safety-test","version":"0.1"}}}' \
@@ -57,6 +64,7 @@ BEFORE=$(snapshot_state)
 python3 "$(dirname "$0")/../chaos/scenarios/crashloop.py" >/dev/null
 sleep 45
 kubectl apply -f "$(dirname "$0")/../infra/demo-app/base.yaml" >/dev/null
+kubectl -n "$NS" rollout restart deploy/payments-api >/dev/null || true
 kubectl -n "$NS" rollout status deploy/payments-api --timeout=180s >/dev/null
 sleep 5
 AFTER=$(snapshot_state)

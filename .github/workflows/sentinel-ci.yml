@@ -53,6 +53,23 @@ jobs:
         kubectl apply -f infra/crd/incident-remediation-crd.yaml
         kubectl get crd incidentremediations.sentinel.sre.io
 
+    - name: Install and Start Kubernetes MCP Server
+      run: |
+        echo "Installing Kubernetes MCP Server binary..."
+        curl -sLo /usr/local/bin/kubernetes-mcp-server https://github.com/containers/kubernetes-mcp-server/releases/download/v0.0.66/kubernetes-mcp-server-linux-amd64
+        chmod +x /usr/local/bin/kubernetes-mcp-server
+        echo "Starting MCP server daemon..."
+        KCFG="${KUBECONFIG:-$HOME/.kube/config}"
+        nohup /usr/local/bin/kubernetes-mcp-server --port 9236 --bind-address 127.0.0.1 --kubeconfig "$KCFG" --disable-destructive > /tmp/mcp-server.log 2>&1 &
+        for i in {1..15}; do
+          if curl -s http://127.0.0.1:9236/mcp >/dev/null 2>&1; then
+            echo "✓ Kubernetes MCP Server is UP and listening on port 9236"
+            break
+          fi
+          sleep 1
+        done
+        cat /tmp/mcp-server.log || true
+
     - name: Run Safety Invariant Proof (0 Drift Pre-Approval)
       run: |
         bash tests/test_safety.sh
