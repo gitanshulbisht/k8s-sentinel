@@ -117,7 +117,7 @@ class CockpitHandler(SimpleHTTPRequestHandler):
             subprocess.run(restart_cmd, shell=True, check=True, capture_output=True)
 
             self.send_json(200, {
-                "success": true,
+                "success": True,
                 "message": "Live Kubernetes remediation applied and deployment restarted!"
             })
         except Exception as e:

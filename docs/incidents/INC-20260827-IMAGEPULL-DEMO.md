@@ -6,7 +6,7 @@
 | **Severity** | **SEV-2** |
 | **Target Service** | `payments-api` (Namespace: `demo`) |
 | **Root Cause Class** | `IMAGE_TAG_INVALID` |
-| **Incident Date** | 2026-08-27 14:29:26 UTC |
+| **Incident Date** | 2026-08-29 08:22:18 UTC |
 | **Autonomous MTTR** | **6.27s (Autonomous MTTR) vs 30m (Traditional Human SLA)** |
 | **Investigation Lead** | **K8s Sentinel** (TrueForge Autonomous SRE Agent) |
 | **Human Invariant** | **0 Pre-Approval State Drift (Verified)** |

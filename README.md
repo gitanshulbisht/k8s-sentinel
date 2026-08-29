@@ -12,6 +12,16 @@
 [![Golden Tests](https://img.shields.io/badge/Golden_Tests-4%2F4_Passed-success.svg)](tests/run_golden.sh)
 [![Demo Video](https://img.shields.io/badge/Demo_Video-1080p_Neural_Voice-orange.svg)](#-demo-video--walkthrough)
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/gitanshulbisht/k8s-sentinel)
+[![Live Demo on GitHub Pages](https://img.shields.io/badge/Live_Web_Cockpit-GitHub_Pages-22c55e.svg?logo=github)](https://gitanshulbisht.github.io/k8s-sentinel/)
+
+---
+
+## 🚀 Live Interactive Deployments
+
+| Deployment Option | Target Environment | Capabilities & Access Link |
+| :--- | :--- | :--- |
+| **🌐 Live Generative UI Cockpit** | **Instant Browser / Mobile** | Zero-setup, instant load on GitHub's global CDN. Experience the visual mission control, side-by-side ConfigMap diffs, and remediation simulation.<br>👉 **[Launch Cockpit Web App](https://gitanshulbisht.github.io/k8s-sentinel/)** |
+| **☁️ 1-Click Interactive Cloud Sandbox** | **GitHub Codespaces (100% Free)** | Boots a dedicated Ubuntu cloud virtual machine with a **real Kind Kubernetes cluster**, **live MCP server**, **TrueForge Web UI (`:8790`)**, and **Live Bidirectional Cockpit Bridge (`:8085`)**.<br>👉 **[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/gitanshulbisht/k8s-sentinel)** |
 
 ---
 
@@ -25,8 +35,10 @@ Want to test K8s Sentinel on a **real Kubernetes cluster in your browser** with 
 2. In ~60 seconds, a dedicated Ubuntu cloud virtual machine launches automatically with:
    * A real **single-node Kind Kubernetes cluster** (`sentinel-demo`) running fragile `payments-api` replicas.
    * Real **`kubernetes-mcp-server`** streaming tools on port `9236`.
+   * Real **TrueForge Web UI** streaming agent sessions on port `8790`.
+   * Real **Live Bidirectional Incident Cockpit** bridged to the cluster on port `8085`.
    * Real **`IncidentRemediation` CRD** and pre-seeded SQLite FTS5 incident memory.
-   * Automatic HTTPS port forwarding for TrueForge (`:8790`), MCP (`:9236`), and Alertmanager (`:9099`).
+   * Automatic HTTPS port forwarding for TrueForge (`:8790`), Cockpit UI (`:8085`), MCP (`:9236`), and Alertmanager (`:9099`).
 3. Open the integrated terminal in your browser and run:
    ```bash
    python3 sentinel/cli.py simulator
@@ -373,8 +385,24 @@ Beyond conversational text responses and structured JSON findings, K8s Sentinel 
 
 ![Incident Cockpit Preview](artifacts/incident-cockpit/preview.png)
 
+* **Live Hosted Web App:** [`https://gitanshulbisht.github.io/k8s-sentinel/`](https://gitanshulbisht.github.io/k8s-sentinel/)
 * **Interactive File:** [`artifacts/incident-cockpit/index.html`](artifacts/incident-cockpit/index.html)
 * **High-Res Preview:** [`artifacts/incident-cockpit/preview.png`](artifacts/incident-cockpit/preview.png)
+* **Live Cluster Bridge Server:** [`sentinel/cockpit_server.py`](sentinel/cockpit_server.py)
+
+### Dual-Mode Architecture: Live Cluster Bridge vs. Standalone Simulation
+
+The Cockpit is engineered with an intelligent **dual-mode runtime**:
+
+1. **Live Kubernetes Bridge Mode (Codespaces / Local Terminal — Option 11):**
+   * Powered by [`sentinel/cockpit_server.py`](sentinel/cockpit_server.py) listening on port `8085`.
+   * **Real-Time 3-Second Polling:** The web UI automatically polls `GET /api/cluster-status`, querying `kubectl -n demo get pods -o json` and ConfigMap status in real time.
+   * **Live Outage Detection:** If chaos is injected (via `crashloop.py` or Option 12 in the terminal), the browser UI automatically detects it within 3 seconds, turns red, and displays the exact crashlooping pod name, status (`0/1 CrashLoopBackOff`), and restart counts.
+   * **Bidirectional Mutation Execution:** Clicking **"Approve & Execute Remediation"** sends `POST /api/remediate`, which executes real `kubectl patch configmap` and `kubectl rollout restart` against the live cluster.
+   * **Live Chaos Trigger:** Clicking **"Reset / Re-Trigger Outage"** sends `POST /api/chaos`, triggering real in-cluster chaos and flipping the UI red.
+2. **Standalone Interactive Simulation Mode (GitHub Pages):**
+   * Hosted on GitHub's global CDN at [`https://gitanshulbisht.github.io/k8s-sentinel/`](https://gitanshulbisht.github.io/k8s-sentinel/).
+   * Seamlessly falls back to client-side execution with **`localStorage` state persistence**—allowing evaluators on phones or tablets to test the approval gate, review diffs, and inspect telemetry with zero backend dependencies.
 
 ### Key Cockpit Features:
 1. **Pod Fleet Topology & Health:** Visual representation of all replicas (`0/1 CrashLoopBackOff` vs `1/1 Running`), showing container exit codes and restart counters.

@@ -403,7 +403,19 @@ If any rule fails, the patch is blocked immediately with a non-compliant audit v
 
 **Problem:** Complex Kubernetes agent architectures are notoriously difficult for evaluators to test because they require a host Docker runtime, a running Kubernetes cluster, a Go MCP server, a Node.js TrueForge instance, and Python tools. Asking judges to set this up locally risks environment conflicts or abandonment.
 
-**Solution:** We authored `.devcontainer/devcontainer.json` and `.devcontainer/setup.sh`. Utilizing GitHub's Docker-in-Docker feature, any judge can launch a full Ubuntu cloud VM directly in their browser for 100% free. The bootstrap script automatically starts a real Kind cluster (`sentinel-demo`), deploys `payments-api`, installs the `IncidentRemediation` CRD, pre-warms SQLite memory, launches the `kubernetes-mcp-server`, and automatically forwards all ports with public HTTPS URLs. Evaluators can run `python3 sentinel/cli.py simulator` inside their browser terminal immediately with zero local installation.
+**Solution:** We authored `.devcontainer/devcontainer.json` and `.devcontainer/setup.sh`. Utilizing GitHub's Docker-in-Docker feature, any judge can launch a full Ubuntu cloud VM directly in their browser for 100% free. The bootstrap script automatically starts a real Kind cluster (`sentinel-demo`), deploys `payments-api`, installs the `IncidentRemediation` CRD, pre-warms SQLite memory, launches the `kubernetes-mcp-server`, auto-launches the TrueForge Web UI on port 8790, and automatically forwards all ports with public HTTPS URLs. Evaluators can run `python3 sentinel/cli.py simulator` inside their browser terminal immediately with zero local installation.
+
+---
+
+### Entry 5.13 — Live Bidirectional Cockpit Bridge & Hybrid Cloud Architecture
+
+**Problem:** While our Generative UI Cockpit was an interactive visual artifact, it was initially a purely client-side simulation. If an evaluator injected real chaos into the live Kind cluster, the static web page had no connection to the real Kubernetes control plane, and clicking "Approve" didn't execute real mutations.
+
+**Solution:** We engineered a **dual-mode live bridge architecture**:
+1. **Live Kubernetes Bridge Backend (`sentinel/cockpit_server.py`):** In Codespaces and local environments, port `8085` runs a lightweight HTTP server bridging the browser to the live cluster. The UI automatically polls `/api/cluster-status` every 3 seconds, querying `kubectl -n demo get pods -o json` and ConfigMap status in real time. When chaos occurs, the UI automatically turns red and displays the real crashlooping pod. When the operator clicks **"Approve & Execute Remediation"**, it sends `POST /api/remediate`, applying the real `kubectl patch` and deployment rollout restart on the live cluster.
+2. **Zero-Setup Static Deployment (GitHub Pages CDN):** Deployed to `https://gitanshulbisht.github.io/k8s-sentinel/`. When opened in an environment without a cluster, the Cockpit detects the absence of the backend API and seamlessly operates in **Interactive Demo Mode** with persistent `localStorage`, allowing evaluators on mobile phones or laptops to test the approval gate with zero setup.
+
+---
 
 ### Status at Final Hackathon Milestone
 
@@ -412,7 +424,9 @@ If any rule fails, the patch is blocked immediately with a non-compliant audit v
 - TrueForge runtime active at :8790 with SQLite persistent memory ✓
 - Golden validation suite: 4/4 passed (`tests/run_golden.sh`) ✓
 - Safety invariant proof: 0 drift verified (`tests/test_safety.sh`) ✓
-- Generative UI Incident Cockpit: interactive web artifact live (`artifacts/incident-cockpit/`) ✓
+- Generative UI Incident Cockpit: live bidirectional bridge (`sentinel/cockpit_server.py`) ✓
+- GitHub Pages Live Deployment: `https://gitanshulbisht.github.io/k8s-sentinel/` ✓
+- 1-Click Cloud Deployment: GitHub Codespaces devcontainer (`codespaces.new/gitanshulbisht/k8s-sentinel`) ✓
 - Proactive 24/7 Watcher Daemon: event-driven session dispatch (`watcher/sentinel_watcher.py`) ✓
 - Automated MTTR Benchmark: 6.14s average MTTR (`tests/benchmark_mttr.sh`) ✓
 - Automated Blameless Postmortems: 4 standard SRE reports in `docs/incidents/` ✓
@@ -422,21 +436,7 @@ If any rule fails, the patch is blocked immediately with a non-compliant audit v
 - Smart Log Distillation: 97.43% token savings (`sentinel/log_distiller.py`) ✓
 - DeepSeek Multi-Model Cascade Router: $0.00028/run triage (`sentinel/model_router.py`) ✓
 - Native SQLite FTS5 RAG: 0.237ms BM25 incident retrieval (`sentinel/memory_rag.py`) ✓
-- Interactive SRE Operations CLI: unified management center (`sentinel/cli.py`) ✓
+- Interactive SRE Operations CLI & Simulator: unified management center (`sentinel/cli.py`) ✓
 - Qodo audit log (`docs/qodo-log.md`) & Field Report submission article complete ✓
 - 1080p Neural Video: 17 complete scenes with live TrueForge UI, cockpit demonstration, CRD & CI/CD (9.99 mins) ✓
-- 1-Click Cloud Deployment: GitHub Codespaces devcontainer with real Kind cluster in browser ✓
-
-### Status at end of Day 3
-
-- Kind cluster `sentinel-demo` up and healthy ✓
-- Kubernetes MCP server streaming tools with `--disable-destructive` ✓
-- TrueForge runtime active at :8790 ✓
-- OpenRouter model provider + Daytona sandbox provider configured & verified ✓
-- Golden validation suite: 4/4 passed ✓
-- Safety suite: 0 failures ✓
-- Live agent triage & root-cause isolation verified ✓
-- Approval-gate safety verified (Layer 2) ✓
-- Session persistence verified ✓
-- Qodo audit log (`docs/qodo-log.md`) & Field Report submission article draft published ✓
 
