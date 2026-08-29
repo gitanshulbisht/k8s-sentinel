@@ -11,6 +11,26 @@
 [![Safety Suite](https://img.shields.io/badge/Safety_Proof-0_Drift_Verified-brightgreen.svg)](docs/safety-proof.md)
 [![Golden Tests](https://img.shields.io/badge/Golden_Tests-4%2F4_Passed-success.svg)](tests/run_golden.sh)
 [![Demo Video](https://img.shields.io/badge/Demo_Video-1080p_Neural_Voice-orange.svg)](#-demo-video--walkthrough)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/gitanshulbisht/k8s-sentinel)
+
+---
+
+## ☁️ 1-Click Cloud Deployment (GitHub Codespaces — 100% Free)
+
+Want to test K8s Sentinel on a **real Kubernetes cluster in your browser** with zero local installation?
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/gitanshulbisht/k8s-sentinel)
+
+1. Click the **Open in GitHub Codespaces** button above.
+2. In ~60 seconds, a dedicated Ubuntu cloud virtual machine launches automatically with:
+   * A real **single-node Kind Kubernetes cluster** (`sentinel-demo`) running fragile `payments-api` replicas.
+   * Real **`kubernetes-mcp-server`** streaming tools on port `9236`.
+   * Real **`IncidentRemediation` CRD** and pre-seeded SQLite FTS5 incident memory.
+   * Automatic HTTPS port forwarding for TrueForge (`:8790`), MCP (`:9236`), and Alertmanager (`:9099`).
+3. Open the integrated terminal in your browser and run:
+   ```bash
+   python3 sentinel/cli.py simulator
+   ```
 
 ---
 

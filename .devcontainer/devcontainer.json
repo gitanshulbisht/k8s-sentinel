@@ -1,0 +1,44 @@
+{
+  "name": "K8s Sentinel — Autonomous SRE Sandbox",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "version": "latest",
+      "helm": "none",
+      "minikube": "none"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+  "forwardPorts": [8790, 9236, 9099, 80],
+  "portsAttributes": {
+    "8790": {
+      "label": "TrueForge Web UI",
+      "onAutoForward": "notify"
+    },
+    "9236": {
+      "label": "Kubernetes MCP Server",
+      "onAutoForward": "silent"
+    },
+    "9099": {
+      "label": "Alertmanager Webhook",
+      "onAutoForward": "silent"
+    },
+    "80": {
+      "label": "Demo App (payments-api)",
+      "onAutoForward": "silent"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-python.python"
+      ]
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh"
+}
