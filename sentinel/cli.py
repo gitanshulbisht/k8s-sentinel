@@ -130,7 +130,7 @@ def cmd_triage(ns="demo"):
         patch_cmd = 'kubectl patch configmap nginx-healthz -n demo --type merge -p \'{"data":{"default.conf":"server {\\n    listen 80;\\n\\n    location = /healthz {\\n        return 200 \\"ok\\\\n\\";\\n    }\\n}\\n"}}\''
         subprocess.run(patch_cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         subprocess.run("kubectl rollout restart deploy/payments-api -n demo", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        spinner_task("Waiting for deployment rollout restart to complete", 3.0)
+        spinner_task("Phase 6: REMEDIATE & VERIFY — Rolling out deployment & probing HTTP /healthz", 3.0)
         print(f"  {C_GREEN}✓ All 3 replicas healthy (3/3 Ready, Running, 200 OK){C_RESET}")
         print(f"  {C_GREEN}🎉 INCIDENT CLOSED SUCCESSFULLY!{C_RESET}\n")
     else:

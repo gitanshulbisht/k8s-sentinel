@@ -43,7 +43,7 @@ def menu():
  {C_BOLD}SELECT AN AUTONOMOUS SRE CAPABILITY TO DEMONSTRATE:{C_RESET}
 
   {C_CYAN}[1]{C_RESET}  {C_BOLD}Inspect Pod Fleet Status{C_RESET}              (Live Cluster Health Matrix)
-  {C_CYAN}[2]{C_RESET}  {C_BOLD}Run Autonomous 5-Phase Triage{C_RESET}         (Discovery ➔ Daytona Sandbox ➔ Patch)
+  {C_CYAN}[2]{C_RESET}  {C_BOLD}Run Autonomous 6-Phase Triage{C_RESET}         (Discovery ➔ Daytona Sandbox ➔ Remediation)
   {C_CYAN}[3]{C_RESET}  {C_BOLD}Query Native Kubernetes CRD{C_RESET}           (`kubectl get incidents -n demo`)
   {C_CYAN}[4]{C_RESET}  {C_BOLD}Ephemeral Canary Sandbox Test{C_RESET}         (Pre-Flight in-pod HTTP 200 Probe)
   {C_CYAN}[5]{C_RESET}  {C_BOLD}GitOps-First PR Remediation{C_RESET}           (ArgoCD/Flux Zero-Drift PR Manifest)

@@ -118,7 +118,8 @@ Given a simple alert — *"Investigate: payments pods are crash-looping in names
 5. **SYNTHESIZE (Evidence-Backed Root Cause):** Identifies the exact root cause down to the corrupted file, line number, and directive (e.g., `this_directive_does_not_exist 42;` in `/etc/nginx/conf.d/default.conf:3`).
 6. **PROPOSE (Surgical Remediation):** Synthesizes the exact YAML/JSON merge patch and rollout restart command, tagging all mutating actions with `mutating: true`.
 7. **STOP (Runtime Human Approval Gate):** Halts automatically before executing mutating operations. Zero cluster state drift occurs without explicit operator confirmation.
-8. **PERSIST (SQLite Memory):** Stores the entire incident context in TrueForge's persistent SQLite database, enabling instant cross-session recall across turns and restarts.
+8. **REMEDIATE & VERIFY (Closed-Loop Rollout & Canary Verification):** Upon operator sign-off (or in autonomous auto-heal mode for dev/staging), applies the surgical patch, triggers a controlled deployment rollout restart, and executes an ephemeral canary probe (`GET /healthz -> 200 OK`) to verify 3/3 replicas return to healthy Running state before closing the incident.
+9. **PERSIST & POSTMORTEM (SQLite Memory & Blameless Report):** Stores the entire incident execution graph in TrueForge's persistent SQLite database, enabling instant cross-session recall across turns and restarts, and generates a Google SRE-standard blameless postmortem.
 
 ---
 

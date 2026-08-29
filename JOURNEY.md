@@ -414,6 +414,7 @@ If any rule fails, the patch is blocked immediately with a non-compliant audit v
 **Solution:** We engineered a **dual-mode live bridge architecture**:
 1. **Live Kubernetes Bridge Backend (`sentinel/cockpit_server.py`):** In Codespaces and local environments, port `8085` runs a lightweight HTTP server bridging the browser to the live cluster. The UI automatically polls `/api/cluster-status` every 3 seconds, querying `kubectl -n demo get pods -o json` and ConfigMap status in real time. When chaos occurs, the UI automatically turns red and displays the real crashlooping pod. When the operator clicks **"Approve & Execute Remediation"**, it sends `POST /api/remediate`, applying the real `kubectl patch` and deployment rollout restart on the live cluster.
 2. **Zero-Setup Static Deployment (GitHub Pages CDN):** Deployed to `https://gitanshulbisht.github.io/k8s-sentinel/`. When opened in an environment without a cluster, the Cockpit detects the absence of the backend API and seamlessly operates in **Interactive Demo Mode** with persistent `localStorage`, allowing evaluators on mobile phones or laptops to test the approval gate with zero setup.
+3. **Formalized 9-Stage Closed-Loop Lifecycle:** Refined the investigation lifecycle to explicitly include Stage 8 (**REMEDIATE & VERIFY — Closed-Loop Rollout & Canary Verification**) between the Human Approval Gate and SQLite Persistence, ensuring that surgical patch execution and in-pod health verification are tracked as a core autonomous milestone.
 
 ---
 
